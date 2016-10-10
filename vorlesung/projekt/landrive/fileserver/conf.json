@@ -1,5 +1,0 @@
-{
-	"Port":"1234",
-	"ServerCrt":"src/de/vorlesung/projekt/landrive/fileserver/server.crt",
-	"ServerKey":"src/de/vorlesung/projekt/landrive/fileserver/server.key"
-}

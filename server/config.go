@@ -13,7 +13,7 @@ type Configuration struct {
 }
 
 func GetConfig() Configuration {
-	file, _ := os.Open("src/de/vorlesung/projekt/landrive/fileserver/conf.json")
+	file, _ := os.Open("server/conf.json")
 	decoder := json.NewDecoder(file)
 	configuration := Configuration{}
 	err := decoder.Decode(&configuration)

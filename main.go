@@ -1,8 +1,7 @@
 package main
 
-import	"de/vorlesung/projekt/landrive/fileserver"
+import "fileserver/server"
 
 func main(){
 	fileserver.StartFileserver()
 }
-
