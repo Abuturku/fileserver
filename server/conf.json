@@ -1,5 +1,0 @@
-{
-	"Port":"1234",
-	"ServerCrt":"server/server.crt",
-	"ServerKey":"server/server.key"
-}

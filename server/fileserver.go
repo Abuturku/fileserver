@@ -1,16 +1,16 @@
-package fileserver;
+package server;
 
 import (
 	"io"
 	"log"
 	"net/http"
+	"flag"
 )
 
 func StartFileserver() { 
-	configuration :=  GetConfig() 
 	log.Println("Server Startet")
 	http.HandleFunc("/hello", HelloServer)
-	err := http.ListenAndServeTLS(":"+configuration.Port, configuration.ServerCrt, configuration.ServerKey, nil)
+	err := http.ListenAndServeTLS(":"+flag.Lookup("Port").Value.String(), flag.Lookup("ServerKey").Value.String(), flag.Lookup("ServerCrt").Value.String(), nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
