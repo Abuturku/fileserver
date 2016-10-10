@@ -1,0 +1,62 @@
+body{
+	background-color: aliceblue;
+	font: 0.75em/2em arial,geneva,helvetica,center,sans-serif; 
+}
+
+header{
+	background-color: AAC5FF;
+    margin-bottom: 2rem;
+	text-align:center;
+}
+
+h1{
+	display: inline-block;
+	margin:0.5rem;
+	vertical-align: middle;
+	color: white;
+}
+
+h3.start{
+	margin: 0;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    background-color: eeefff;
+    border: 0.5rem solid white;
+}
+
+#logo{
+	margin: 0.5rem;
+	vertical-align: middle;
+	text-align: left;
+}
+
+#login_register{
+	text-align: center;
+    width: 70%;
+    margin: auto;
+}
+
+#login, #register{
+	display: inline-block;
+    width: 49%;
+    background-color: white;
+	margin-top: 0.2rem;
+	margin-bottom: 0.2rem;
+	max-width: 20rem;
+    height: 17rem;
+	vertical-align: middle;
+}
+
+input.index_button{
+    margin: 1rem;
+    width: 30%;
+    min-width: 5rem;	
+}
+
+label{
+	display:block;
+}
+
+input{
+	padding: 0.3rem;
+}
