@@ -1,7 +1,7 @@
 package main
 
 import "flag"
-import "de/vorlesung/projekt/landrive/server"
+import "landrive/server"
 
 func main(){
 	flag.String("Port", "1234", "The Port of the Server")
