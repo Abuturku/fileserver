@@ -3,9 +3,10 @@ package server
 import (
 	"flag"
 	"html/template"
-	"io"
+	//"io"
 	"log"
 	"net/http"
+	"io/ioutil"
 )
 
 func StartFileserver() {
@@ -18,5 +19,23 @@ func StartFileserver() {
 }
 
 func HelloServer(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, "This is an example server.\n")
+	//io.WriteString(w, "This is an example server.\n")
+	title := req.URL.Path[len("/website/"):]
+    p := loadPage(title)
+    t, _ := template.ParseFiles("index.html")
+    t.Execute(w, p)
 }
+
+func loadPage(title string) *Page {
+    filename := title + ".txt"
+    body, _ := ioutil.ReadFile(filename)
+    return &Page{Title: title, Body: body}
+}
+
+type Page struct {
+    Title string
+    Body  []byte
+}
+
+ 
+ 
