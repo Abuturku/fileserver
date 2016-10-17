@@ -6,9 +6,11 @@ import (
 )
 
 func main(){
-	flag.String("Port", "1234", "The port of the server")
-	flag.String("ServerKey","server/server.key","Path to key file")
-	flag.String("ServerCrt", "server/server.crt", "Path to certificate file")
+	flag.String("P", "443", "The port of the server")
+	flag.String("K","server/server.key","Path to key file")
+	flag.String("C", "server/server.crt", "Path to certificate file")
+	flag.String("L", "server/users.csv", "Path to file, where usernames, passwords and salts are stored")
+	flag.String("T", "900", "Session timeout given in seconds")
 	flag.Parse()
 	
 	
