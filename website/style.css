@@ -7,6 +7,7 @@ header{
 	background-color: AAC5FF;
     margin-bottom: 2rem;
 	text-align:center;
+	height: 5rem;
 }
 
 h1{
@@ -59,4 +60,41 @@ label{
 
 input{
 	padding: 0.3rem;
+}
+
+/****** landrive.html specific ******/
+#landrive{
+	background-color:eeefff;
+}
+.headerPart{
+	margin:0;
+	background-color: AAC5FF;
+	text-align:center;
+	height: 5rem;
+}
+#page{
+	width:100%;
+	height:100%;
+}
+.folders{
+	width: 25%;
+	display: inline-block;
+	max-height:100%;
+}
+.files{
+	width: 75%;
+	float: right;
+	display: inline-block;
+	max-height:100%;
+}
+#folderBar, #availableFiles{
+	overflow:auto;
+	height:80%;
+	padding: 0.5rem;
+}
+#folderbar{
+	background-color:white;
+}
+#availableFiles{
+	background-color: aliceblue;
 }
