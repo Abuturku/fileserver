@@ -1,0 +1,61 @@
+[{
+	"id": 1,
+	"parent": 0,
+	"foldername": "Folder A"
+}, {
+	"id": 2,
+	"parent": 0,
+	"foldername": "B"
+}, {
+	"id": 3,
+	"parent": 0,
+	"foldername": "C"
+}, {
+	"id": 4,
+	"parent": 1,
+	"foldername": "Aa"
+}, {
+	"id": 5,
+	"parent": 1,
+	"foldername": "Ab"
+}, {
+	"id": 6,
+	"parent": 4,
+	"foldername": "Aaa"
+}, {
+	"id": 7,
+	"parent": 4,
+	"foldername": "Aab"
+}, {
+	"id": 8,
+	"parent": 7,
+	"foldername": "Aaba"
+}, {
+	"id": 9,
+	"parent": 2,
+	"foldername": "Ba"
+}, {
+	"id": 10,
+	"parent": 3,
+	"foldername": "Ca"
+}, {
+	"id": 11,
+	"parent": 3,
+	"foldername": "Cb"
+}, {
+	"id": 12,
+	"parent": 2,
+	"foldername": "Bb"
+}, {
+	"id": 13,
+	"parent": 12,
+	"foldername": "Bba"
+}, {
+	"id": 14,
+	"parent": 12,
+	"foldername": "Bbb"
+}, {
+	"id": 15,
+	"parent": 3,
+	"foldername": "Cc"
+}]

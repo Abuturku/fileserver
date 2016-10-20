@@ -1,0 +1,23 @@
+{
+	"files": [{
+		"fileIn": "A",
+		"fileName": "File1",
+		"fileDate": "10.10.2010",
+		"fileSize": "50 MB"
+	}, {
+		"fileIn": "Home",
+		"fileName": "File1a",
+		"fileDate": "10.10.2010",
+		"fileSize": "50 MB"
+	}, {
+		"fileIn": "Home",
+		"fileName": "File1b",
+		"fileDate": "10.10.2010",
+		"fileSize": "50 MB"
+	}, {
+		"fileIn": "Home",
+		"fileName": "File1c",
+		"fileDate": "10.10.2010",
+		"fileSize": "50 MB"
+	}]
+}

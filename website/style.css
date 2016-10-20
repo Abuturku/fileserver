@@ -2,41 +2,47 @@ body{
 	background-color: aliceblue;
 	font: 0.75em/2em arial,geneva,helvetica,center,sans-serif; 
 }
-
 header{
-	background-color: AAC5FF;
+	background-color: #BCE0FF;
     margin-bottom: 2rem;
 	text-align:center;
 	height: 5rem;
 }
-
 h1{
 	display: inline-block;
 	margin:0.5rem;
 	vertical-align: middle;
 	color: white;
 }
-
-h3.start{
-	margin: 0;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    background-color: eeefff;
-    border: 0.5rem solid white;
-}
-
 #logo{
 	margin: 0.5rem;
 	vertical-align: middle;
 	text-align: left;
 }
-
+input.index_button{
+    margin: 1rem;
+    width: 30%;
+    min-width: 5rem;	
+}
+label{
+	display:block;
+}
+input{
+	padding: 0.3rem;
+}
+/****** index.html specific ******/
+h3.start{
+	margin: 0;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    background-color: #d8dfe5;
+    border: 0.5rem solid white;
+}
 #login_register{
 	text-align: center;
     width: 70%;
     margin: auto;
 }
-
 #login, #register{
 	display: inline-block;
     width: 49%;
@@ -47,54 +53,189 @@ h3.start{
     height: 17rem;
 	vertical-align: middle;
 }
-
-input.index_button{
-    margin: 1rem;
-    width: 30%;
-    min-width: 5rem;	
-}
-
-label{
-	display:block;
-}
-
-input{
-	padding: 0.3rem;
+#errormessage{
+	width:70%;
+	margin: auto;
+	text-align:center;
+	margin-top:0.7rem;
+	padding-top:1rem;
+	padding-bottom:1rem;
+	background-color: lightpink;
+	font-weight: bold;
+	max-width:39.7rem;
 }
 
 /****** landrive.html specific ******/
+.inline_button{
+display:inline-block;
+}
 #landrive{
-	background-color:eeefff;
+	background-color:#gainsboro;
 }
-.headerPart{
-	margin:0;
-	background-color: AAC5FF;
-	text-align:center;
-	height: 5rem;
-}
+/**page structure**/
 #page{
 	width:100%;
 	height:100%;
 }
+#tableheader th{
+	height: 5rem;
+    background-color: #BCE0FF;
+}
 .folders{
 	width: 25%;
-	display: inline-block;
-	max-height:100%;
-}
-.files{
-	width: 75%;
-	float: right;
-	display: inline-block;
-	max-height:100%;
-}
-#folderBar, #availableFiles{
-	overflow:auto;
-	height:80%;
-	padding: 0.5rem;
-}
-#folderbar{
 	background-color:white;
 }
-#availableFiles{
+.files{
+	width: 74%;
+	background-color:aliceblue;
+}
+#folderField, #filesField{
+	overflow: auto;
+	height:100%;
+}
+#folderField{
+	padding: 0.5rem;
+}
+#filesField{
+	padding: 1rem;
+}
+/**folder controls**/
+.icon_button{
+	height:64px;
+	width:64px;
+	padding:0;
+	border: none;
+	cursor:pointer;
+	border-radius:0.3rem;
+	vertical-align:middle;
+}
+.folder_icon{
+    background-color: #D1EBFF;
+}
+.folder_icon:hover{
+	background-color:#BCE0FF;
+}
+.icon_new{
+	background-image:url("icon_add.png");
+}
+.icon_delete_file, .icon_delete_folder{
+	background-image:url("icon_del.png");
+}
+/**folder structure**/
+#folderControls{
+	margin-bottom:1rem;
+}
+div#folderRoot, div.folderChild{
+	padding-left:0.5rem;
+	padding-top:0.5rem;
+}
+#folderStructure div:first-child{
+	font-weight:bold;
+	padding:0.5rem;
+}
+#folderRoot{
+    background-color: #d8dfe5;
+}
+#folderStructure>div.folderChild{
+	border-right:2px solid #d8dfe5;
+	border-left:2px solid #d8dfe5;
+	border-bottom:2px solid #d8dfe5;
+}
+.folderChild{
+	margin-left:1rem;
+	border-left:1px solid #BCE0FF;
+	border-top:1px solid #BCE0FF;
+}
+#folderStructure div:hover{
+	background-color: rgba(216,223,229,0.5);
+}
+#selectedFolder{
+	background-color: #D1EBFF;
+}
+/**file controls**/
+form.inline_button{
+	margin-bottom:0;
+}
+.file_icon{
 	background-color: aliceblue;
+}
+.file_icon:hover{
+	background-color: #D1EBFF;
+}
+.inactive_icon{
+	background-color: lightgray;
+	cursor: auto;
+}
+.inactive_icon:hover{
+	background-color: lightgray;
+}
+.files > div{
+	vertical-align:middle;
+}
+#buttongroup1{
+	float:left;
+	margin-left:1rem;
+}
+#currentFolder{
+	display:inline-block;
+	float: left;
+    padding-left: 1rem;
+	font-style:italic;
+}
+#buttongroup2{
+    float: right;
+    margin-right: 1rem;
+}
+.icon_back{
+	background-image:url("icon_bck.png");
+}
+.icon_forward{
+	background-image:url("icon_fwd.png");
+}
+.icon_download{
+	background-image:url("icon_dow.png");
+}
+input.icon_upload{
+	/*Opacity settings for all browsers*/
+    opacity: 0;
+    -moz-opacity: 0;
+    filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0)
+}
+#icon_upload_wrapper{
+	background-image:url("icon_upl.png");
+	height:64px;
+	width:64px;
+    background-color: aliceblue;
+	border-radius:0.3rem;
+}
+#icon_upload_wrapper:hover{
+	background-color: #D1EBFF;
+}
+
+/**files**/
+.file{
+	display:inline-block;
+	width:8rem;
+	height:5rem;
+	background-color:white;
+	margin-right:1rem;
+	margin-bottom:1rem;
+	padding:0.5rem;
+	vertical-align:middle;
+	text-align: center;	
+}
+.fileData{
+	font-style: italic;
+	color:gray;
+	margin-top: 0.5rem;
+}
+.fileDate, .fileSize{
+	display:block;
+}
+.file:hover{
+	background-color: rgba(216,223,229,0.5);
+}
+
+#selectedFile{
+	background-color: #D1EBFF;
 }

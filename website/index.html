@@ -4,6 +4,7 @@
         <title>
             LAN Drive
         </title>
+		<script language="javascript" type="text/javascript" src="static/validation.js"></script>
         <link rel="stylesheet" href="static/style.css" type="text/css">
     </head>
     <body> 
@@ -18,11 +19,11 @@
 				<form action="/login" method="post">
 					<span>
 						<label for="username">Benutzername:</label>
-						<input type="text" name="username">
+						<input type="text" name="username" id="l_username">
 					</span>
 					<span>
 						<label for="password">Passwort:</label>
-						<input type="password" name="password">
+						<input type="password" name="password" id="l_password">
 					</span>
 					<div>
 						<input type="submit" value="Login" class="index_button">
@@ -34,15 +35,15 @@
 				<form action="/register" method="post">
 					<span>
 						<label for="username">Benutzername:</label>
-						<input type="text" name="username">
+						<input type="text" name="username" id="r_username">
 					</span>
 					<span>
 						<label for="password">Passwort:</label>
-						<input type="password" name="password">
+						<input type="password" name="password" id="r_password">
 					</span>
 					<span>
 						<label for="password2">Wiederhole Passwort:</label>
-						<input type="password" name="password2">
+						<input type="password" name="password2" id="r_password2">
 					</span>
 					<div>
 						<input type="submit" value="Registrieren" class="index_button">
@@ -50,6 +51,6 @@
 				</form>
 			</div>
 		</div>
-	
+		<div id="errormessage"><div>
 	</body>	
 </html>

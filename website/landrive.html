@@ -4,37 +4,151 @@
         <title>
             LAN Drive
         </title>
-		<script language="javascript" type="text/javascript" src="site_logic.js"></script>
+		<script language="javascript" type="text/javascript" src="dummyData.js"></script>
+        <script language="javascript" type="text/javascript" src="landrive.js"></script>
         <link rel="stylesheet" href="style.css" type="text/css">
     </head>
     <body id="landrive"> 
 		<table id="page">
-			<tr>
-				<th class="headerPart" class="folders">
+			<tr id="tableheader">
+				<th class="folders">
 					<img id="logo" src="logo.png" alt="Logo LAN_Drive" height="60" width="80">
 					<h1>LAN Drive</h1>
 				</th>
-				<th class="headerPart" class="files">
-					button controls
+				<th class="files">
+					<div id="buttongroup1">
+						<input type="submit" value="" onclick="onclickNavigateBack()" class="icon_back icon_button file_icon inactive_icon" title="download selected file">
+						<input type="submit" value="" onclick="onclickNavigateForward()" class="icon_forward icon_button file_icon inactive_icon" title="download selected file">
+					</div>
+					<div id="currentFolder">
+						<h1 id="folderName">js: Home</h1>
+					</div>
+					<div id="buttongroup2">
+						<input type="submit" value="" class="icon_download icon_button file_icon inactive_icon" onclick="onclickDownloadFile()" title="download selected file">
+						<form class="inline_button" action="/uploadFile" method="post">
+							<div id="icon_upload_wrapper">
+								<input type="file" value="" class="icon_upload icon_button file_icon" title="upload new file into current folder">
+							</div>
+						</form>
+						<input type="submit" value="" class="icon_delete_file icon_button file_icon inactive_icon" onclick="onclickDeleteFile()" title="delete selected file">
+					</div>
 				</th>
 			</tr>
 			<tr>
 				<td class="folders">
-					<div id="folderButtons">
-						
-					</div>
-					<div id="folderStructure">
-						<div id="folderRoot">
-							<span id="homeTitle"></span>
+					<div id="folderField">
+						<div id="folderControls">
+							<form class="inline_button" action="/newFolder" method="post">
+								<input type="submit" value="" class="icon_new icon_button folder_icon" title="create new folder">
+							</form>
+							<form class="inline_button" action="/delFolder" method="post">
+								<input type="submit" value="" class="icon_delete_folder icon_button folder_icon inactive_icon" title="delete selected folder">
+							</form>
 						</div>
-						<div class="folderChild">
-							<span class="folderTitle">
+						<div id="folderStructure">
+							<div id="folderRoot" onclick="onclickFolderSelected(this, event)">
+								<span id="homeTitle">js: Home of Max Mustermann</span>
+							</div>
+							<div class="folderChild" onclick="onclickFolderSelected(this, event)">
+								<span>js: MASTERFOLDER</span>
+							</div>
+							<div class="folderChild" onclick="onclickFolderSelected(this, event)">
+								<span>js: folder xy</span>
+								
+								<div class="folderChild" onclick="onclickFolderSelected(this, event)">
+									<span>js: folder xyz</span>
+								</div>
+							</div>
+							<div class="folderChild" onclick="onclickFolderSelected(this, event)">
+								<span>js: folder ab</span>
+								
+								<div class="folderChild" onclick="onclickFolderSelected(this, event)">
+									<span>js: folder abc</span>
+								</div>
+								
+								<div class="folderChild" onclick="onclickFolderSelected(this, event)">
+									<span>js: folder abd</span>
+									<div class="folderChild" onclick="onclickFolderSelected(this, event)">
+										<span>js: folder abde</span>
+									</div>
+								</div>
+								<div class="folderChild" onclick="onclickFolderSelected(this, event)">
+									<span>js: folder abd</span>
+									<div class="folderChild" onclick="onclickFolderSelected(this, event)">
+										<span>js: folder abde</span>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</td>
-				<td class="files" 
-					<div id="availableFiles">
-					
+				<td class="files">
+					<div id="filesField">
+						<div id="availableFiles">
+							<div class="file" onclick="onclickFileSelected(this)">
+								<span class="fileTitle">MASTERFILE</span>
+								<div class="fileData">
+									<span class="fileDate">01.01.2011</span>
+									<span class="fileSize">50 MB</span>
+								</div>
+							</div>
+							<div class="file" onclick="onclickFileSelected(this)">
+								<span class="fileTitle">other file</span>
+								<div class="fileData">
+									<span class="fileDate">01.01.2011</span>
+									<span class="fileSize">50 MB</span>
+								</div>
+							</div>
+							<div class="file" onclick="onclickFileSelected(this)">
+								<span class="fileTitle">other file</span>
+								<div class="fileData">
+									<span class="fileDate">01.01.2011</span>
+									<span class="fileSize">50 MB</span>
+								</div>
+							</div>
+							<div class="file" onclick="onclickFileSelected(this)">
+								<span class="fileTitle">other file</span>
+								<div class="fileData">
+									<span class="fileDate">01.01.2011</span>
+									<span class="fileSize">50 MB</span>
+								</div>
+							</div>
+							<div class="file" onclick="onclickFileSelected(this)">
+								<span class="fileTitle">other file</span>
+								<div class="fileData">
+									<span class="fileDate">01.01.2011</span>
+									<span class="fileSize">50 MB</span>
+								</div>
+							</div>
+							<div class="file" onclick="onclickFileSelected(this)">
+								<span class="fileTitle">other file</span>
+								<div class="fileData">
+									<span class="fileDate">01.01.2011</span>
+									<span class="fileSize">50 MB</span>
+								</div>
+							</div>
+							<div class="file" onclick="onclickFileSelected(this)">
+								<span class="fileTitle">other file</span>
+								<div class="fileData">
+									<span class="fileDate">01.01.2011</span>
+									<span class="fileSize">50 MB</span>
+								</div>
+							</div>
+							<div class="file" onclick="onclickFileSelected(this)">
+								<span class="fileTitle">other file</span>
+								<div class="fileData">
+									<span class="fileDate">01.01.2011</span>
+									<span class="fileSize">50 MB</span>
+								</div>
+							</div>
+							<div class="file" onclick="onclickFileSelected(this)">
+								<span class="fileTitle">other file</span>
+								<div class="fileData">
+									<span class="fileDate">01.01.2011</span>
+									<span class="fileSize">50 MB</span>
+								</div>
+							</div>
+						</div>
 					</div>
 				</td>
 			</tr>
