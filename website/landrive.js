@@ -186,6 +186,7 @@ function onclickDeleteFile(){
 	alert("TODO: delete " + document.getElementById("selectedFile").children[0].innerHTML);
 	//make delete file button unavailable
 	deactivateButton("icon_delete_file");
+	deactivateButton("icon_download");
 }
 	
 	
