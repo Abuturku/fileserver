@@ -165,6 +165,7 @@ form.inline_button{
 .inactive_icon{
 	background-color: lightgray;
 	cursor: auto;
+	pointer-events:none;
 }
 .inactive_icon:hover{
 	background-color: lightgray;
