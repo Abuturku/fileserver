@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/csv"
 	"encoding/hex"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"html/template"
@@ -12,9 +13,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	//"bufio"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 )
 
 func StartFileserver() {
@@ -23,7 +25,6 @@ func StartFileserver() {
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/register", newUserHandler)
 	http.HandleFunc("/landrive", landrive)
-	http.HandleFunc("/uploadFile", uploadFile)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("website"))))
 	err := http.ListenAndServeTLS(":"+flag.Lookup("P").Value.String(), flag.Lookup("C").Value.String(), flag.Lookup("K").Value.String(), nil)
 	if err != nil {
@@ -32,29 +33,35 @@ func StartFileserver() {
 }
 
 func index(w http.ResponseWriter, req *http.Request) {
-	if checkCookie(req) {
+	cookiecheck, _ := checkCookie(req)
+	if cookiecheck {
 		http.Redirect(w, req, "/landrive", http.StatusMovedPermanently)
 	} else {
-		//io.WriteString(w, "This is an example server.\n")
-		title := req.URL.Path[len("/"):]
-		p, _ := loadPage(title)
 		t, _ := template.ParseFiles("website/index.html")
-		t.Execute(w, p)
+		t.Execute(w, nil)
 	}
 }
 
 func landrive(w http.ResponseWriter, req *http.Request) {
-	if checkCookie(req) {
-		title := req.URL.Path[len("/"):]
-		p, _ := loadPage(title)
+	cookiecheck, user := checkCookie(req)
+	if cookiecheck {
 		t, _ := template.ParseFiles("website/landrive.html")
-		t.Execute(w, p)
+		log.Println("Load FolderStruct " + user.name)
+		folders := getFolderStruct(user.name)
+		b, err := json.Marshal(folders)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(string(b))
+
+		t.Execute(w, nil)
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	}
 }
 
-func checkCookie(req *http.Request) bool {
+func checkCookie(req *http.Request) (bool, user) {
 	cookies := req.Cookies()
 
 	for _, cookie := range cookies {
@@ -63,30 +70,11 @@ func checkCookie(req *http.Request) bool {
 		user := loadUser(cookieName)
 
 		if cookiePw == hash([]string{user.name, user.password}) {
-			return true
+			return true, *user
 		}
 
 	}
-	return false
-}
-
-func uploadFile(w http.ResponseWriter, req *http.Request) {
-
-	req.ParseMultipartForm(32 << 20)
-	file, handler, err := req.FormFile("uploadfile")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer file.Close()
-	fmt.Fprintf(w, "%v", handler.Header)
-	f, err := os.OpenFile("./file/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer f.Close()
-	io.Copy(f, file)
+	return false, user{}
 }
 
 func loginHandler(w http.ResponseWriter, req *http.Request) {
@@ -158,18 +146,9 @@ func createUser(username string, password string) user {
 	if err != nil {
 		log.Println(err)
 	}
-	
+
 	createFolder(username)
 	return user{name: username, password: hashedPw, salt: salt}
-}
-
-func loadPage(title string) (*Page, error) {
-	filename := title + ".txt"
-	body, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	return &Page{Title: title, Body: body}, nil
 }
 
 type Page struct {
@@ -233,6 +212,45 @@ func hash(strings []string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func createFolder(path string){
-	os.Mkdir("files/"+path, 0777)
+func createFolder(path string) {
+	os.Mkdir(flag.Lookup("F").Value.String()+path, 0777)
+}
+
+type Folder struct {
+	Name    string
+	Files   []File
+	Folders []Folder
+}
+
+type File struct {
+	Name    string
+	Date 	time.Time
+	Size	int64
+}
+
+func getFolderStruct(path string) Folder {
+	log.Println(path)
+	index := strings.Index(path, "/")
+	var name string
+	if index > 0 {
+		name = path[index+1:]
+	} else {
+		name = path
+	}
+	files := make([]File, 0)
+	folders := make([]Folder, 0)
+	log.Println(name + ": ")
+	fileinfos, _ := ioutil.ReadDir(flag.Lookup("F").Value.String() + "/" + path)
+
+	for _, file := range fileinfos {
+		if file.IsDir() {
+			folders = append(folders, getFolderStruct(path+"/"+file.Name()))
+		} else {
+			log.Println(file.Name())
+			fileStruct := File{Name: file.Name(), Date: file.ModTime(), Size: file.Size()}
+			files = append(files, fileStruct)
+		}
+	}
+	folder := Folder{Name: name, Files: files, Folders: folders}
+	return folder
 }

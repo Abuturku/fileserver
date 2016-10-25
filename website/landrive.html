@@ -46,39 +46,20 @@
 							</form>
 						</div>
 						<div id="folderStructure">
-							<div id="folderRoot" onclick="onclickFolderSelected(this, event)">
-								<span id="homeTitle">js: Home of Max Mustermann</span>
-							</div>
-							<div class="folderChild" onclick="onclickFolderSelected(this, event)">
-								<span>js: MASTERFOLDER</span>
-							</div>
-							<div class="folderChild" onclick="onclickFolderSelected(this, event)">
-								<span>js: folder xy</span>
-								
-								<div class="folderChild" onclick="onclickFolderSelected(this, event)">
-									<span>js: folder xyz</span>
-								</div>
-							</div>
-							<div class="folderChild" onclick="onclickFolderSelected(this, event)">
-								<span>js: folder ab</span>
-								
-								<div class="folderChild" onclick="onclickFolderSelected(this, event)">
-									<span>js: folder abc</span>
-								</div>
-								
-								<div class="folderChild" onclick="onclickFolderSelected(this, event)">
-									<span>js: folder abd</span>
-									<div class="folderChild" onclick="onclickFolderSelected(this, event)">
-										<span>js: folder abde</span>
+							{{with .Folders}}
+            					{{range $index, $element := .}}
+            						<div id="{{.Name}}" onclick="onclickFolderSelected(this, event)">
+            							<span id="{{.Name}}">{{.Name}}</span>
+            							{{with .Folders}}
+            								{{range .}}
+            									<div id="{{.Name}}" onclick="onclickFolderSelected(this, event)">
+            										<span id=":{{.Name}}">{{.Name}}</span>
+            									</div>
+            								{{end}}
+           				 				{{end}} 
 									</div>
-								</div>
-								<div class="folderChild" onclick="onclickFolderSelected(this, event)">
-									<span>js: folder abd</span>
-									<div class="folderChild" onclick="onclickFolderSelected(this, event)">
-										<span>js: folder abde</span>
-									</div>
-								</div>
-							</div>
+            					{{end}}
+           				 	{{end}} 
 						</div>
 					</div>
 				</td>
