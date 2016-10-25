@@ -25,7 +25,7 @@
 					</div>
 					<div id="buttongroup2">
 						<input type="submit" value="" class="icon_download icon_button file_icon inactive_icon" onclick="onclickDownloadFile()" title="download selected file">
-						<form class="inline_button" action="/uploadFile" method="post">
+						<form class="inline_button" action="/uploadFile" method="post" enctype="multipart/form-data" onchange="onFileSelectedForUpload(this)">
 							<div id="icon_upload_wrapper">
 								<input type="file" value="" class="icon_upload icon_button file_icon" title="upload new file into current folder">
 							</div>

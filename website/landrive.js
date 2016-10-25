@@ -189,4 +189,6 @@ function onclickDeleteFile(){
 	deactivateButton("icon_download");
 }
 	
-	
+function onFileSelectedForUpload(form){
+	form.submit();
+}

@@ -25,6 +25,7 @@ func StartFileserver() {
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/register", newUserHandler)
 	http.HandleFunc("/landrive", landrive)
+	http.HandleFunc("/uploadFile", uploadFileHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("website"))))
 	err := http.ListenAndServeTLS(":"+flag.Lookup("P").Value.String(), flag.Lookup("C").Value.String(), flag.Lookup("K").Value.String(), nil)
 	if err != nil {
@@ -253,4 +254,8 @@ func getFolderStruct(path string) Folder {
 	}
 	folder := Folder{Name: name, Files: files, Folders: folders}
 	return folder
+}
+
+func uploadFileHandler(w http.ResponseWriter, req *http.Request){
+	log.Println("Request to upload a file was made")
 }
