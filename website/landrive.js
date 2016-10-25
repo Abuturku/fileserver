@@ -1,20 +1,71 @@
 //todo not hard coded!
-var depthOfFoldersUnderRoot = 3;
+var depthOfFoldersUnderRoot = 0;
 //todo not hard coded!
 var username = "Max Muster";
+
+var folderData;
+loadFolderData();
 
 var folderBacklog = [];
 var currentFolder;
 var folderForwlog = [];
 
+//todo catch server response instead of using hardcoded data
 function loadFolderData(){
-	/*
-	var mydata = JSON.parse(data);
-	alert(mydata[0].name);
-	alert(mydata[0].age);
-	alert(mydata[1].name);
-	alert(mydata[1].age);
-	*/
+	folderData = {
+		"Name": "Andy",
+		"Files": [{
+			"Name": ".DS_Store",
+			"Date": "2016-10-25T12:43:55+02:00",
+			"Size": 6148
+		}, {
+			"Name": "TestDatei.txt",
+			"Date": "2016-10-20T15:22:26+02:00",
+			"Size": 0
+		}],
+		"Folders": [{
+			"Name": "AndererTest",
+			"Files": [{
+				"Name": ".DS_Store",
+				"Date": "2016-10-25T12:44:06+02:00",
+				"Size": 6148
+			}],
+			"Folders": [{
+				"Name": "AndererTest/O1",
+				"Files": [],
+				"Folders": []
+			}, {
+				"Name": "AndererTest/O2",
+				"Files": [],
+				"Folders": []
+			}]
+		}, {
+			"Name": "TestOrdner",
+			"Files": [{
+				"Name": ".DS_Store",
+				"Date": "2016-10-25T12:43:44+02:00",
+				"Size": 6148
+			}, {
+				"Name": "Test",
+				"Date": "2016-10-20T16:19:34+02:00",
+				"Size": 0
+			}, {
+				"Name": "TestDateiZwei.txt",
+				"Date": "2016-10-20T15:22:36+02:00",
+				"Size": 0
+			}],
+			"Folders": [{
+				"Name": "TestOrdner/Test2",
+				"Files": [{
+					"Name": "Test",
+					"Date": "2016-10-20T16:19:34+02:00",
+					"Size": 0
+				}],
+				"Folders": []
+			}]
+		}]
+	}
+	username = folderData.Name;
 }
 
 function deactivateButton(sId){
@@ -27,12 +78,44 @@ function activateButton(sId){
 	document.getElementsByClassName(sId)[0].classList.remove("inactive_icon");
 }
 
-function loadFilesOfFolder(foldername){
-	//todo use real data!
-	loadFilesOfFolderWithDummyData(foldername);
+window.onload = function () {
+	function generateFolderStructure(){
+		//show root folder
+		var rootHtml = '<div id="folderRoot" onclick="onclickFolderSelected(this, event)"><span id="homeTitle">Home of ';
+			rootHtml += username + '</span></div>';
+		document.getElementById("folderStructure").innerHTML = rootHtml;
+		//show deep structure via recursion
+		var foldersHtml = readFolderStructureRec("", folderData.Folders, 1);
+		document.getElementById("folderStructure").innerHTML += foldersHtml;
+	}
+
+	function readFolderStructureRec(foldersHtml, childFolders, depth){
+		numberOfChildren = childFolders.length;
+		//exit condition 
+		if (numberOfChildren === 0){
+			return "";
+		}
+		//recursive calls
+		for (var i = 0; i < numberOfChildren; i++){
+			var nameOfCurrChild = childFolders[i].Name;
+			//generate new folder 
+			foldersHtml += '<div class="folderChild" onclick="onclickFolderSelected(this, event)"><span>';
+			foldersHtml += nameOfCurrChild + '</span>';
+			
+			//test if depth is new maximum
+			if (depth > depthOfFoldersUnderRoot){
+				depthOfFoldersUnderRoot = depth;
+			}
+			foldersHtml += readFolderStructureRec(foldersHtml, childFolders[i].Folders, depth+1);
+			foldersHtml += '</div>';
+		}
+		return foldersHtml;
+	}
+
+	generateFolderStructure();
 }
 
-function loadFilesOfFolderWithDummyData(foldername){
+function loadFilesDummy(foldername){
 	var filesInFolder = document.getElementById("availableFiles");
 	var sContent = "";
 	var fileInfo = JSON.parse(files);
@@ -53,7 +136,7 @@ function loadFilesOfFolderWithDummyData(foldername){
 	filesInFolder.innerHTML = sContent;
 }
 
-//TODO: input-Feld folderPath anpassen bei jedem Ordnerwechsel; alles unterhalb root
+//TODO: input-Feld folderPath anpassen bei jedem Ordnerwechsel; alles unterhalb root ||| das selbe für delete mit hidden input
 function folderSelected(elem,event){
 	var folderName = elem.children[0].innerHTML;
 	//load files of selected folder
