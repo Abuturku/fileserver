@@ -53,6 +53,7 @@ function loadFilesOfFolderWithDummyData(foldername){
 	filesInFolder.innerHTML = sContent;
 }
 
+//TODO: input-Feld folderPath anpassen bei jedem Ordnerwechsel; alles unterhalb root
 function folderSelected(elem,event){
 	var folderName = elem.children[0].innerHTML;
 	//load files of selected folder

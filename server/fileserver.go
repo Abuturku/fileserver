@@ -34,7 +34,7 @@ func StartFileserver() {
 }
 
 func index(w http.ResponseWriter, req *http.Request) {
-	cookiecheck, _ := checkCookie(req)
+	cookiecheck, _ := checkCookie(w, req)
 	if cookiecheck {
 		http.Redirect(w, req, "/landrive", http.StatusMovedPermanently)
 	} else {
@@ -44,17 +44,17 @@ func index(w http.ResponseWriter, req *http.Request) {
 }
 
 func landrive(w http.ResponseWriter, req *http.Request) {
-	cookiecheck, user := checkCookie(req)
+	cookiecheck, user := checkCookie(w, req)
 	if cookiecheck {
 		t, _ := template.ParseFiles("website/landrive.html")
-		log.Println("Load FolderStruct " + user.name)
+		log.Println("Loading FolderStruct for user " + user.name)
 		folders := getFolderStruct(user.name)
-		b, err := json.Marshal(folders)
+		_, err := json.Marshal(folders)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		fmt.Println(string(b))
+		//fmt.Println(string(b))
 
 		t.Execute(w, nil)
 	} else {
@@ -62,15 +62,19 @@ func landrive(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func checkCookie(req *http.Request) (bool, user) {
+func checkCookie(w http.ResponseWriter, req *http.Request) (bool, user) {
 	cookies := req.Cookies()
-
+	
 	for _, cookie := range cookies {
 		cookieName := cookie.Name
 		cookiePw := cookie.Value
 		user := loadUser(cookieName)
 
 		if cookiePw == hash([]string{user.name, user.password}) {
+			//following 3 lines are responsible for setting the cookie expiration date 15 minutes to the future
+			expiration := time.Now().Add(15 * time.Minute)
+			cookie.Expires = expiration
+			http.SetCookie(w, cookie)
 			return true, *user
 		}
 
@@ -224,13 +228,13 @@ type Folder struct {
 }
 
 type File struct {
-	Name    string
-	Date 	time.Time
-	Size	int64
+	Name string
+	Date time.Time
+	Size int64
 }
 
 func getFolderStruct(path string) Folder {
-	log.Println(path)
+	//log.Println(path)
 	index := strings.Index(path, "/")
 	var name string
 	if index > 0 {
@@ -240,14 +244,14 @@ func getFolderStruct(path string) Folder {
 	}
 	files := make([]File, 0)
 	folders := make([]Folder, 0)
-	log.Println(name + ": ")
+	//log.Println(name + ": ")
 	fileinfos, _ := ioutil.ReadDir(flag.Lookup("F").Value.String() + "/" + path)
 
 	for _, file := range fileinfos {
 		if file.IsDir() {
 			folders = append(folders, getFolderStruct(path+"/"+file.Name()))
 		} else {
-			log.Println(file.Name())
+			//log.Println(file.Name())
 			fileStruct := File{Name: file.Name(), Date: file.ModTime(), Size: file.Size()}
 			files = append(files, fileStruct)
 		}
@@ -256,6 +260,41 @@ func getFolderStruct(path string) Folder {
 	return folder
 }
 
-func uploadFileHandler(w http.ResponseWriter, req *http.Request){
-	log.Println("Request to upload a file was made")
+func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
+	cookiecheck, user := checkCookie(w, req)
+	if cookiecheck {
+		log.Println("Request to upload a file was made from user " + user.name)
+
+		defer http.Redirect(w, req, "/landrive", http.StatusMovedPermanently)
+	
+		//Fileupload orientiert nach https://www.socketloop.com/tutorials/golang-upload-file
+		file, header, err := req.FormFile("uploadFile")
+		folderPath := req.FormValue("folderPath")
+		if err != nil {
+			log.Println(w, err)
+			return
+		}
+
+		defer file.Close()
+		
+		filepath := "files/"+user.name+ "/"+folderPath+"/"+header.Filename
+		
+		out, err := os.Create(filepath)
+		if err != nil {
+			log.Println(w, "Unable to create the file for writing. Check your write access privilege. Path: " + filepath)
+			return
+		}
+
+		defer out.Close()
+
+		// write the content from POST to the file
+		_, err = io.Copy(out, file)
+		if err != nil {
+			log.Println(w, err)
+		}
+		
+		
+		log.Println(w, "File uploaded successfully : ")
+		log.Println(w, header.Filename)
+	}
 }
