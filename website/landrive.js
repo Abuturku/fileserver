@@ -85,31 +85,31 @@ window.onload = function () {
 			rootHtml += username + '</span></div>';
 		document.getElementById("folderStructure").innerHTML = rootHtml;
 		//show deep structure via recursion
-		var foldersHtml = readFolderStructureRec("", folderData.Folders, 1);
+		var foldersHtml = readFolderStructureRec(folderData.Folders, 1);
 		document.getElementById("folderStructure").innerHTML += foldersHtml;
 	}
 
-	function readFolderStructureRec(foldersHtml, childFolders, depth){
-		numberOfChildren = childFolders.length;
+	function readFolderStructureRec(childFolders, depth){
 		//exit condition 
-		if (numberOfChildren === 0){
+		if (childFolders.length === 0){
 			return "";
 		}
+		var foldersHtmlTemp = "";
 		//recursive calls
-		for (var i = 0; i < numberOfChildren; i++){
+		for (var i = 0; i < childFolders.length; i++){
 			var nameOfCurrChild = childFolders[i].Name;
 			//generate new folder 
-			foldersHtml += '<div class="folderChild" onclick="onclickFolderSelected(this, event)"><span>';
-			foldersHtml += nameOfCurrChild + '</span>';
+			foldersHtmlTemp += '<div class="folderChild" onclick="onclickFolderSelected(this, event)"><span>';
+			foldersHtmlTemp += nameOfCurrChild + '</span>';
 			
 			//test if depth is new maximum
 			if (depth > depthOfFoldersUnderRoot){
 				depthOfFoldersUnderRoot = depth;
 			}
-			foldersHtml += readFolderStructureRec(foldersHtml, childFolders[i].Folders, depth+1);
-			foldersHtml += '</div>';
+			foldersHtmlTemp += readFolderStructureRec(childFolders[i].Folders, depth+1);
+			foldersHtmlTemp += '</div>';
 		}
-		return foldersHtml;
+		return foldersHtmlTemp;
 	}
 
 	generateFolderStructure();
@@ -136,7 +136,7 @@ function loadFilesDummy(foldername){
 	filesInFolder.innerHTML = sContent;
 }
 
-//TODO: input-Feld folderPath anpassen bei jedem Ordnerwechsel; alles unterhalb root ||| das selbe für delete mit hidden input
+//TODO: input-Feld folderPath anpassen bei jedem Ordnerwechsel; alles unterhalb root ||| das selbe fuer delete mit hidden input
 function folderSelected(elem,event){
 	var folderName = elem.children[0].innerHTML;
 	//load files of selected folder
