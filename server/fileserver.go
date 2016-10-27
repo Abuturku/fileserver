@@ -27,6 +27,8 @@ func StartFileserver() {
 	http.HandleFunc("/landrive", landrive)
 	http.HandleFunc("/uploadFile", uploadFileHandler)
 	http.HandleFunc("/getFolderStruct", folderStructHandler)
+	http.HandleFunc("/logout", logoutHandler)
+	http.HandleFunc("/newFolder", createFolderHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("website"))))
 	err := http.ListenAndServeTLS(":"+flag.Lookup("P").Value.String(), flag.Lookup("C").Value.String(), flag.Lookup("K").Value.String(), nil)
 	if err != nil {
@@ -35,7 +37,7 @@ func StartFileserver() {
 }
 
 func index(w http.ResponseWriter, req *http.Request) {
-	cookiecheck, _ := checkCookie(w, req)
+	cookiecheck, _, _ := checkCookie(w, req)
 	if cookiecheck {
 		http.Redirect(w, req, "/landrive", http.StatusMovedPermanently)
 	} else {
@@ -45,7 +47,7 @@ func index(w http.ResponseWriter, req *http.Request) {
 }
 
 func landrive(w http.ResponseWriter, req *http.Request) {
-	cookiecheck, _ := checkCookie(w, req)
+	cookiecheck, _, _ := checkCookie(w, req)
 	if cookiecheck {
 		t, err := template.ParseFiles("website/landrive.html")
 		if err != nil {
@@ -61,7 +63,7 @@ func landrive(w http.ResponseWriter, req *http.Request) {
 }
 
 func folderStructHandler(w http.ResponseWriter, req *http.Request) {
-	cookiecheck, user := checkCookie(w, req)
+	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
 		log.Println("Loading FolderStruct for user " + user.name)
 		folders := getFolderStruct(user.name)
@@ -77,9 +79,44 @@ func folderStructHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func checkCookie(w http.ResponseWriter, req *http.Request) (bool, user) {
+func logoutHandler(w http.ResponseWriter, req *http.Request) {
+	cookiecheck, user, cookie := checkCookie(w, req)
+	if cookiecheck {
+		log.Println("Logout: " + user.name)
+		cookie.Expires = time.Now().Add(-1)
+		cookie.Value = ""
+		http.SetCookie(w, &cookie)
+		http.Redirect(w, req, "/", http.StatusMovedPermanently)
+	} else {
+		http.Redirect(w, req, "/", http.StatusMovedPermanently)
+	}
+}
+
+func createFolderHandler(w http.ResponseWriter, req *http.Request) {
+	cookiecheck, user, _ := checkCookie(w, req)
+	if cookiecheck {
+		log.Println("Create Folder: " + user.name)
+		path := req.FormValue("path")
+		createFolder(path);
+	} else {
+		http.Redirect(w, req, "/", http.StatusMovedPermanently)
+	}
+}
+ 
+func deleteHandler(w http.ResponseWriter, req *http.Request) {
+	cookiecheck, user, _ := checkCookie(w, req)
+	if cookiecheck {
+		log.Println("Create Folder: " + user.name)
+		path := req.FormValue("path")
+		os.RemoveAll(flag.Lookup("F").Value.String()+path)
+	} else {
+		http.Redirect(w, req, "/", http.StatusMovedPermanently)
+	}
+} 
+
+func checkCookie(w http.ResponseWriter, req *http.Request) (bool, user, http.Cookie) {
 	cookies := req.Cookies()
-	
+
 	for _, cookie := range cookies {
 		cookieName := cookie.Name
 		cookiePw := cookie.Value
@@ -90,11 +127,11 @@ func checkCookie(w http.ResponseWriter, req *http.Request) (bool, user) {
 			expiration := time.Now().Add(15 * time.Minute)
 			cookie.Expires = expiration
 			http.SetCookie(w, cookie)
-			return true, *user
+			return true, *user, *cookie
 		}
 
 	}
-	return false, user{}
+	return false, user{}, http.Cookie{}
 }
 
 func loginHandler(w http.ResponseWriter, req *http.Request) {
@@ -276,12 +313,12 @@ func getFolderStruct(path string) Folder {
 }
 
 func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
-	cookiecheck, user := checkCookie(w, req)
+	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
 		log.Println("Request to upload a file was made from user " + user.name)
 
 		defer http.Redirect(w, req, "/landrive", http.StatusMovedPermanently)
-	
+
 		//Fileupload orientiert nach https://www.socketloop.com/tutorials/golang-upload-file
 		file, header, err := req.FormFile("uploadFile")
 		folderPath := req.FormValue("folderPath")
@@ -291,12 +328,12 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 		}
 
 		defer file.Close()
-		
+
 		filepath := flag.Lookup("F").Value.String()+user.name+ "/"+folderPath+"/"+header.Filename
 		
 		out, err := os.Create(filepath)
 		if err != nil {
-			log.Println(w, "Unable to create the file for writing. Check your write access privilege. Path: " + filepath)
+			log.Println(w, "Unable to create the file for writing. Check your write access privilege. Path: "+filepath)
 			return
 		}
 
@@ -307,8 +344,7 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			log.Println(w, err)
 		}
-		
-		
+
 		log.Println(w, "File uploaded successfully : ")
 		log.Println(w, header.Filename)
 	}

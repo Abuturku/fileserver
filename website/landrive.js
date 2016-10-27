@@ -4,14 +4,15 @@ var depthOfFoldersUnderRoot = 0;
 var username = "Max Muster";
 
 var folderData;
-loadFolderData();
 
 var folderBacklog = [];
 var currentFolder;
 var folderForwlog = [];
 
 //todo catch server response instead of using hardcoded data
-function loadFolderData(){
+function loadFolderData(data){
+	folderData = data;
+	/* //testdata
 	folderData = {
 		"Name": "Andy",
 		"Files": [{
@@ -64,7 +65,7 @@ function loadFolderData(){
 				"Folders": []
 			}]
 		}]
-	}
+	}*/
 	username = folderData.Name;
 }
 
@@ -74,12 +75,12 @@ function deactivateButton(sId){
 	document.getElementsByClassName(sId)[0].classList.add("inactive_icon"); 
 
 }
+
 function activateButton(sId){
 	document.getElementsByClassName(sId)[0].classList.remove("inactive_icon");
 }
 
-window.onload = function () {
-	function generateFolderStructure(){
+function generateFolderStructure(){
 		//show root folder
 		var rootHtml = '<div id="folderRoot" onclick="onclickFolderSelected(this, event)"><span id="homeTitle">Home of ';
 			rootHtml += username + '</span></div>';
@@ -113,8 +114,19 @@ window.onload = function () {
 		}
 		return foldersHtmlTemp;
 	}
+	
+window.onload = function () {
+	//catch server response
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			loadFolderData(JSON.parse(xmlhttp.responseText));
+			generateFolderStructure();
+		}
+	}
 
-	generateFolderStructure();
+	xmlhttp.open("GET", "/getFolderStruct", true);
+	xmlhttp.send();
 }
 
 function searchCurrentFolderObjectRec(childFolders){
