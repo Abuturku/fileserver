@@ -1,7 +1,7 @@
 package server
 
 import (
-	"bytes"
+	//"bytes"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/csv"
@@ -31,7 +31,7 @@ func StartFileserver() {
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/newFolder", createFolderHandler)
 	http.HandleFunc("/delete", deleteHandler)
-	http.HandleFunc("/downloado", downloadHandler)
+	http.HandleFunc("/download", downloadHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("website"))))
 	err := http.ListenAndServeTLS(":"+flag.Lookup("P").Value.String(), flag.Lookup("C").Value.String(), flag.Lookup("K").Value.String(), nil)
 	if err != nil {
@@ -120,16 +120,20 @@ func deleteHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func downloadHandler(w http.ResponseWriter, req *http.Request) {
+	log.Println("Entering downloadHandler")
 	cookiecheck, _, _ := checkCookie(w, req)
 	if cookiecheck {
 		path := req.FormValue("path")
 		log.Println("Download File: " + path)
-		data, err := ioutil.ReadFile("files/Niklas/users.csv")
-		if err != nil {
-			log.Println(err)
-		}
+//		data, err := ioutil.ReadFile("files/Niklas/users.csv")
+//		if err != nil {
+//			log.Println(err)
+//		}
+		
+		w.Header().Set("Content-Disposition", "attachment; filename=\"users.csv\"")
 
-		http.ServeContent(w, req, "users", time.Now(), bytes.NewReader(data))
+		http.ServeFile(w, req, "files/Niklas/users.csv")
+		//http.ServeContent(w, req, "users", time.Now(), bytes.NewReader(data))
 		// +user.name+"/"+path
 
 	} else {
