@@ -292,7 +292,7 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 
 		defer file.Close()
 		
-		filepath := "files/"+user.name+ "/"+folderPath+"/"+header.Filename
+		filepath := flag.Lookup("F").Value.String()+user.name+ "/"+folderPath+"/"+header.Filename
 		
 		out, err := os.Create(filepath)
 		if err != nil {
