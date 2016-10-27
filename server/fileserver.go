@@ -93,7 +93,7 @@ func logoutHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func createFolderHandler(w http.ResponseWriter, req *http.Request) {
-	cookiecheck, user, cookie := checkCookie(w, req)
+	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
 		log.Println("Create Folder: " + user.name)
 		path := req.FormValue("path")
@@ -104,7 +104,7 @@ func createFolderHandler(w http.ResponseWriter, req *http.Request) {
 }
  
 func deleteHandler(w http.ResponseWriter, req *http.Request) {
-	cookiecheck, user, cookie := checkCookie(w, req)
+	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
 		log.Println("Create Folder: " + user.name)
 		path := req.FormValue("path")
