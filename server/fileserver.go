@@ -47,9 +47,6 @@ func landrive(w http.ResponseWriter, req *http.Request) {
 	cookiecheck, user := checkCookie(w, req)
 	if cookiecheck {
 		t, _ := template.ParseFiles("website/landrive.html")
-		log.Println("Loading FolderStruct for user " + user.name)
-		folders := getFolderStruct(user.name)
-		_, err := json.Marshal(folders)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -57,6 +54,24 @@ func landrive(w http.ResponseWriter, req *http.Request) {
 		//fmt.Println(string(b))
 
 		t.Execute(w, nil)
+	} else {
+		http.Redirect(w, req, "/", http.StatusMovedPermanently)
+	}
+}
+
+func folderStructHandler(w http.ResponseWriter, req *http.Request) {
+	cookiecheck, user := checkCookie(w, req)
+	if cookiecheck {
+		log.Println("Loading FolderStruct for user " + user.name)
+		folders := getFolderStruct(user.name)
+		js, err := json.Marshal(folders)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		//fmt.Println(string(b))
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	}
