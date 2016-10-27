@@ -97,10 +97,12 @@ window.onload = function () {
 		var foldersHtmlTemp = "";
 		//recursive calls
 		for (var i = 0; i < childFolders.length; i++){
-			var nameOfCurrChild = childFolders[i].Name;
 			//generate new folder 
 			foldersHtmlTemp += '<div class="folderChild" onclick="onclickFolderSelected(this, event)"><span>';
-			foldersHtmlTemp += nameOfCurrChild + '</span>';
+			var currentName = childFolders[i].Name;
+			//only show text after the last '/'
+			var nameParts = currentName.split("/");
+			foldersHtmlTemp += nameParts.pop() + '</span>';
 			
 			//test if depth is new maximum
 			if (depth > depthOfFoldersUnderRoot){
@@ -115,34 +117,77 @@ window.onload = function () {
 	generateFolderStructure();
 }
 
-function loadFilesDummy(foldername){
-	var filesInFolder = document.getElementById("availableFiles");
+function searchCurrentFolderObjectRec(childFolders){
+	for (var i = 0; i < childFolders.length; i++){
+		var nameParts = childFolders[i].Name.split("/");
+		if (nameParts.pop() === document.getElementById("selectedFolder")){
+			return childFolders[i];
+		} else {
+			return searchCurrentFolderObjectRec(childFolders[i].Folders);
+		}
+	}
+}
+
+function getCurrentFolderObject(){
+	if(document.getElementById("selectedFolder").children[0].innerHTML === "Home of "+folderData.Name){
+		return folderData;
+	}
+	return searchCurrentFolderObjectRec(folderData.Folders);
+}
+
+function formatFileSize(fileSizeByte){
+	var intResult = fileSizeByte;
+	var temp;
+	nextSize = 1024;
+	if (fileSizeByte < nextSize){
+		return "" + intResult + " B";
+	}
+	if (fileSizeByte < nextSize*nextSize){
+		temp = "" + fileSizeByte/nextSize;
+		intResult = temp.split(".")[0];
+		return "" + intResult + " MB";
+	}
+	nextSize *= 1024;
+	if (fileSizeByte < nextSize*nextSize){
+		temp = "" + fileSizeByte/nextSize;
+		intResult = temp.split(".")[0];
+		return "" + intResult + " GB";
+	}
+	nextSize *= 1024;
+	temp = "" + fileSizeByte/nextSize;
+	intResult = temp.split(".")[0];
+	return "" + intResult + " TB";
+}
+
+function loadFiles(){
+	var fileSpace = document.getElementById("availableFiles");
 	var sContent = "";
-	var fileInfo = JSON.parse(files);
+	var folderObj = getCurrentFolderObject();
+	var fileInfo = folderObj.Files;
 	
 	console.log(fileInfo);
 	
 	for(var i=0;i<fileInfo.length;i++){
-		if(fileInfo[i].fileIn===foldername){
-			//create file reference in html
-			sContent += '<div class="file" onclick="onclickFileSelected(this)"><span class="fileTitle">';
-			sContent += fileInfo[i].fileName + '</span>';
-			sContent += '<div class="fileData"><span class="fileDate">'
-			sContent += fileInfo[i].fileDate + '</span>';
-			sContent += '<span class="fileSize">'
-			sContent += fileInfo[i].fileSize + '</span></div></div>'			
-		}
+		//format information
+		var fileName = fileInfo[i].Name;
+		var fullDate = fileInfo[i].Date.split("T");
+		var fileDate = fullDate[0];
+		var fileSize = formatFileSize(fileInfo[i].Size);
+		
+		//create file reference in html
+		sContent += '<div class="file" onclick="onclickFileSelected(this)"><span class="fileTitle">';
+		sContent += fileName + '</span>';
+		sContent += '<div class="fileData"><span class="fileDate">'
+		sContent += fileDate + '</span>';
+		sContent += '<span class="fileSize">'
+		sContent += fileSize + '</span></div></div>'			
 	}
-	filesInFolder.innerHTML = sContent;
+	fileSpace.innerHTML = sContent;
 }
 
 //TODO: input-Feld folderPath anpassen bei jedem Ordnerwechsel; alles unterhalb root ||| das selbe fuer delete mit hidden input
 function folderSelected(elem,event){
 	var folderName = elem.children[0].innerHTML;
-	//load files of selected folder
-	/*/todo not hardcoded!
-	folderName="Home";
-	loadFilesOfFolder(folderName);*/
 	
 	if (event!== null){
 		event.stopPropagation();
@@ -156,6 +201,9 @@ function folderSelected(elem,event){
 	//make file buttons unavailable
 	deactivateButton("icon_download");
 	deactivateButton("icon_delete_file");
+	
+	//load files of selected folder
+	loadFiles();
 }
 
 function onclickFolderSelected(elem, event){
