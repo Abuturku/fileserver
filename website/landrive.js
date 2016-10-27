@@ -255,7 +255,7 @@ function removeFolderIds(divs, remainingFuncCalls){
 			var divChildren = divs[i].children;
 			var remainsNew = remainingFuncCalls - 1;
 			if(remainsNew <=0){
-				return;
+				continue;
 			}
 			removeFolderIds(divChildren, remainsNew);
 		}
