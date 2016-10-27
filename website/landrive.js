@@ -28,7 +28,7 @@ function loadFolderData(){
 			"Files": [{
 				"Name": ".DS_Store",
 				"Date": "2016-10-25T12:44:06+02:00",
-				"Size": 6148
+				"Size": 6148123
 			}],
 			"Folders": [{
 				"Name": "AndererTest/O1",
@@ -44,7 +44,7 @@ function loadFolderData(){
 			"Files": [{
 				"Name": ".DS_Store",
 				"Date": "2016-10-25T12:43:44+02:00",
-				"Size": 6148
+				"Size": 6148234344
 			}, {
 				"Name": "Test",
 				"Date": "2016-10-20T16:19:34+02:00",
@@ -118,14 +118,20 @@ window.onload = function () {
 }
 
 function searchCurrentFolderObjectRec(childFolders){
+	var folderObj;
 	for (var i = 0; i < childFolders.length; i++){
 		var nameParts = childFolders[i].Name.split("/");
-		if (nameParts.pop() === document.getElementById("selectedFolder")){
+		var nameOfCurrFolder = nameParts.pop();
+		if (nameOfCurrFolder === document.getElementById("selectedFolder").children[0].innerHTML){
 			return childFolders[i];
 		} else {
-			return searchCurrentFolderObjectRec(childFolders[i].Folders);
+			var currTest = searchCurrentFolderObjectRec(childFolders[i].Folders);
+			if(currTest != undefined){
+				folderObj = currTest;
+			}
 		}
 	}
+	return folderObj;
 }
 
 function getCurrentFolderObject(){
@@ -164,8 +170,6 @@ function loadFiles(){
 	var sContent = "";
 	var folderObj = getCurrentFolderObject();
 	var fileInfo = folderObj.Files;
-	
-	console.log(fileInfo);
 	
 	for(var i=0;i<fileInfo.length;i++){
 		//format information
