@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/csv"
@@ -29,6 +30,8 @@ func StartFileserver() {
 	http.HandleFunc("/getFolderStruct", folderStructHandler)
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/newFolder", createFolderHandler)
+	http.HandleFunc("/delete", deleteHandler)
+	http.HandleFunc("/downloado", downloadHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("website"))))
 	err := http.ListenAndServeTLS(":"+flag.Lookup("P").Value.String(), flag.Lookup("C").Value.String(), flag.Lookup("K").Value.String(), nil)
 	if err != nil {
@@ -95,24 +98,44 @@ func logoutHandler(w http.ResponseWriter, req *http.Request) {
 func createFolderHandler(w http.ResponseWriter, req *http.Request) {
 	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
-		log.Println("Create Folder: " + user.name)
+
 		path := req.FormValue("path")
-		createFolder(path);
+		log.Println("Create Folder: " + path)
+		createFolder(user.name + "/" + path)
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	}
 }
- 
+
 func deleteHandler(w http.ResponseWriter, req *http.Request) {
 	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
-		log.Println("Create Folder: " + user.name)
+
 		path := req.FormValue("path")
-		os.RemoveAll(flag.Lookup("F").Value.String()+path)
+		log.Println("delete: " + path)
+		os.RemoveAll(flag.Lookup("F").Value.String() + user.name + "/" + path)
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	}
-} 
+}
+
+func downloadHandler(w http.ResponseWriter, req *http.Request) {
+	cookiecheck, _, _ := checkCookie(w, req)
+	if cookiecheck {
+		path := req.FormValue("path")
+		log.Println("Download File: " + path)
+		data, err := ioutil.ReadFile("files/Niklas/users.csv")
+		if err != nil {
+			log.Println(err)
+		}
+
+		http.ServeContent(w, req, "users", time.Now(), bytes.NewReader(data))
+		// +user.name+"/"+path
+
+	} else {
+		http.Redirect(w, req, "/", http.StatusMovedPermanently)
+	}
+}
 
 func checkCookie(w http.ResponseWriter, req *http.Request) (bool, user, http.Cookie) {
 	cookies := req.Cookies()
@@ -321,7 +344,7 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 
 		//Fileupload orientiert nach https://www.socketloop.com/tutorials/golang-upload-file
 		file, header, err := req.FormFile("uploadFile")
-		folderPath := req.FormValue("folderPath")
+		folderPath := req.FormValue("path")
 		if err != nil {
 			log.Println(w, err)
 			return
@@ -329,8 +352,8 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 
 		defer file.Close()
 
-		filepath := flag.Lookup("F").Value.String()+user.name+ "/"+folderPath+"/"+header.Filename
-		
+		filepath := flag.Lookup("F").Value.String() + user.name + "/" + folderPath + "/" + header.Filename
+
 		out, err := os.Create(filepath)
 		if err != nil {
 			log.Println(w, "Unable to create the file for writing. Check your write access privilege. Path: "+filepath)
