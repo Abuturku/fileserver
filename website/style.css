@@ -121,6 +121,12 @@ display:inline-block;
 .icon_delete_file, .icon_delete_folder{
 	background-image:url("icon_del.png");
 }
+.icon_change_pw{
+	background-image:url("icon_cpw.png");
+}
+.icon_logout{
+	background-image:url("icon_lgo.png");
+}
 /**folder structure**/
 #folderControls{
 	margin-bottom:1rem;
