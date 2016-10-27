@@ -26,6 +26,7 @@ func StartFileserver() {
 	http.HandleFunc("/register", newUserHandler)
 	http.HandleFunc("/landrive", landrive)
 	http.HandleFunc("/uploadFile", uploadFileHandler)
+	http.HandleFunc("/getFolderStruct", folderStructHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("website"))))
 	err := http.ListenAndServeTLS(":"+flag.Lookup("P").Value.String(), flag.Lookup("C").Value.String(), flag.Lookup("K").Value.String(), nil)
 	if err != nil {
@@ -44,9 +45,9 @@ func index(w http.ResponseWriter, req *http.Request) {
 }
 
 func landrive(w http.ResponseWriter, req *http.Request) {
-	cookiecheck, user := checkCookie(w, req)
+	cookiecheck, _ := checkCookie(w, req)
 	if cookiecheck {
-		t, _ := template.ParseFiles("website/landrive.html")
+		t, err := template.ParseFiles("website/landrive.html")
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -69,7 +70,6 @@ func folderStructHandler(w http.ResponseWriter, req *http.Request) {
 			fmt.Println(err)
 			return
 		}
-		//fmt.Println(string(b))
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(js)
 	} else {
