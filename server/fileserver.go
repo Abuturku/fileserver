@@ -100,8 +100,10 @@ func createFolderHandler(w http.ResponseWriter, req *http.Request) {
 	if cookiecheck {
 
 		path := req.FormValue("path")
-		log.Println("Create Folder: " + path)
-		createFolder(user.name + "/" + path)
+		newFolderName := req.FormValue("newFolderName")
+		log.Println("Create Folder: " + path+"/"+newFolderName)
+		createFolder(user.name + "/" + path+"/"+newFolderName)
+		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	}
