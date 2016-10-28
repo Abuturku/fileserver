@@ -344,6 +344,7 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 		//Fileupload orientiert nach https://www.socketloop.com/tutorials/golang-upload-file
 		file, header, err := req.FormFile("uploadFile")
 		folderPath := req.FormValue("path")
+		log.Println("Path where file is going to be placed: " + folderPath)
 		if err != nil {
 			log.Println(w, err)
 			return
