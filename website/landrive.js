@@ -328,7 +328,7 @@ function onFileSelectedForUpload(form){
 	form.submit();
 }
 
-function onclickNewFolder(Form){
+function onclickNewFolder(form){
 	var newFolderName = prompt("Name of the new Folder:", "Example Folder");
 	document.getElementById("newFolderName").value = newFolderName;
 	form.submit();
