@@ -75,7 +75,6 @@ window.onload = function () {
 
 	xmlhttp.open("GET", "/getFolderStruct", true);
 	xmlhttp.send();
-	
 }
 
 function searchCurrentFolderObjectRec(childFolders){
@@ -326,6 +325,18 @@ function onclickDeleteFile(){
 	
 function onFileSelectedForUpload(form){
 	form.submit();
+}
+
+function cancelPwChange(){
+	var cpw_fields = document.getElementsByClassName("cpw_input");
+	for (var i = 0; i<cpw_fields; i++){
+		cpw_fields[i].value = "";
+	}
+	document.getElementById("pwChngDialog").classList.add("hidden");
+}
+
+function onclickChangePw(){
+	document.getElementById("pwChngDialog").classList.remove("hidden");
 }
 
 function onclickNewFolder(form){

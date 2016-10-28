@@ -247,3 +247,27 @@ input.icon_upload{
 #selectedFile{
 	background-color: #D1EBFF;
 }
+
+/**dialog window for pw change**/
+#pwChngDialog {
+	position:absolute;
+	width:97%;
+	height:97%;
+}
+.hidden{
+	visibility:hidden;
+}
+#pwChngDialog #pwcFormContainer{
+	margin: auto;
+	position: absolute;
+	top: 0; left: 0; bottom: 0; right: 0;
+	vertical-align: middle;
+	text-align: center;
+	width:25rem;
+	height:19rem;
+	background-color: white;
+	border:3px solid gainsboro;
+}
+#pwcFormContainer div{
+	margin-top:0.5rem;
+}

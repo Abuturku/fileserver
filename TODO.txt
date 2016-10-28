@@ -12,6 +12,8 @@ Prio 2: Dialogfenster für lösch buttons ("sind sie sicher?")
 	}
 */
 
+Prio 2: datei wird bei geschachtelten Ordnern mit gleichem namen nicht richtig geladen
+
 Prio 3 : ihr gebt mir beim neu laden nach button press aktionen den folderpath zum letzten aktiven folder mit, damit der benutzer in dem ordner bleibt, in den er hochgeladen hat
 
 Prio 4: ich geb euch die navigationshistory mit und ihr gebt sie mir auch wieder damit es so scheint als wäre die seite garnicht neu geladen worden

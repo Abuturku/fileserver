@@ -46,9 +46,7 @@
 							<form class="inline_button" action="/delFolder" method="post">
 								<input type="submit" value="" class="icon_delete_folder icon_button folder_icon inactive_icon" title="delete selected folder">
 							</form>
-							<form class="inline_button" action="/changePw" method="post">
-								<input type="submit" value="" class="icon_change_pw icon_button folder_icon" title="change password">
-							</form>
+							<input type="submit" value="" onclick="onclickChangePw()" class="icon_change_pw icon_button folder_icon" title="change password">
 							<form class="inline_button" action="/logout" method="post">
 								<input type="submit" value="" class="icon_logout icon_button folder_icon" title="logout">
 							</form>
@@ -66,6 +64,29 @@
 					</div>
 				</td>
 			</tr>
+		</div>
+		<div id="pwChngDialog" class="hidden">
+			<div id="pwcFormContainer">
+				<h3 class="start">Change Password</h3>
+				<form action="/changePw" method="post">
+					<span>
+						<label for="oldPassword">Old password:</label>
+						<input type="password" name="oldPassword" id="cpw_op" class="cpw_input">
+					</span>
+					<span>
+						<label for="newPassword">New password:</label>
+						<input type="password" name="newPassword" id="cpw_np1" class="cpw_input">
+					</span>
+					<span>
+						<label for="newPassword2">Repeat new password:</label>
+						<input type="password" name="newPassword2" id="cpw_np2" class="cpw_input">
+					</span>
+					<div>
+						<input type="submit" value="Change Password" class="index_button">
+						<input type="button" onclick="cancelPwChange()" value="Cancel" class="index_button">
+					</div>
+				</form>
+			</div>
 		</div>
 	</body>
 </html>
