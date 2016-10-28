@@ -4,6 +4,7 @@ var depthOfFoldersUnderRoot = 0;
 var username = "Max Muster";
 
 var folderData;
+var currentFolderPath = "";
 
 var folderBacklog = [];
 var currentFolder;
@@ -82,7 +83,7 @@ function activateButton(sId){
 
 function generateFolderStructure(){
 		//show root folder
-		var rootHtml = '<div id="folderRoot" onclick="onclickFolderSelected(this, event)"><span id="homeTitle">Home of ';
+		var rootHtml = '<div class="folderRoot" onclick="onclickFolderSelected(this, event)"><span id="homeTitle">Home of ';
 			rootHtml += username + '</span></div>';
 		document.getElementById("folderStructure").innerHTML = rootHtml;
 		//show deep structure via recursion
@@ -122,11 +123,14 @@ window.onload = function () {
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 			loadFolderData(JSON.parse(xmlhttp.responseText));
 			generateFolderStructure();
+			folderSelected(document.getElementsByClassName("folderRoot")[0],null);
 		}
 	}
 
 	xmlhttp.open("GET", "/getFolderStruct", true);
 	xmlhttp.send();
+	
+	
 }
 
 function searchCurrentFolderObjectRec(childFolders){
@@ -201,6 +205,42 @@ function loadFiles(){
 	fileSpace.innerHTML = sContent;
 }
 
+function refreshCurrentFolderPath(){
+	var rootName = document.getElementsByClassName("folderRoot")[0].children[0].innerHTML;
+	var pathName;
+	
+	//refresh hidden input fields for form information for server
+	var sPath = "";
+	var elem = document.getElementById("selectedFolder");
+	var folderName = elem.children[0].innerHTML;
+	if(folderName !== rootName){
+		//search pieces for path
+		pathName = [folderName];
+		var currParent = elem.parentElement;
+		while(currParent !== document.getElementById("folderStructure")){
+			pathName.unshift(currParent.children[0].innerHTML);
+			currParent = currParent.parentElement;
+		}
+		//create path with slashes
+		var pathLength = pathName.length;
+		for (var i = 0; i < pathLength; i++){
+			//in front of the first folder no slash!
+			if(i !== 0){
+				sPath += "/";
+			}
+			sPath += pathName.shift();
+		}
+	}
+	currentFolderPath = sPath;
+}
+
+function refreshHiddenInputFieldsFolders(){
+	var inputFields = document.getElementsByClassName("folderPath");
+	for (var i = 0; i < inputFields.length; i++){
+		inputFields[i].value = currentFolderPath;
+	}
+}
+
 //TODO: input-Feld folderPath anpassen bei jedem Ordnerwechsel; alles unterhalb root ||| das selbe fuer delete mit hidden input
 function folderSelected(elem,event){
 	var folderName = elem.children[0].innerHTML;
@@ -210,7 +250,6 @@ function folderSelected(elem,event){
 	}
 	var divs = document.getElementById("folderStructure").children;
 	removeFolderIds(divs, depthOfFoldersUnderRoot);
-	divs[0].id = "folderRoot";
 	elem.id = "selectedFolder";
 	document.getElementById("folderName").innerHTML = elem.children[0].innerHTML;
 	
@@ -220,6 +259,9 @@ function folderSelected(elem,event){
 	
 	//load files of selected folder
 	loadFiles();
+	
+	refreshCurrentFolderPath();
+	refreshHiddenInputFieldsFolders();
 }
 
 function onclickFolderSelected(elem, event){
@@ -235,7 +277,7 @@ function onclickFolderSelected(elem, event){
 	
 	//save the rootFolder as first element in Backlog
 	if(folderBacklog.length === 0){
-		folderBacklog.push(document.getElementById("folderRoot"));
+		folderBacklog.push(document.getElementsByClassName("folderRoot")[0]);
 	} else {
 		folderBacklog.push(currentFolder);
 	}

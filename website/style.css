@@ -83,6 +83,7 @@ display:inline-block;
 }
 .folders{
 	width: 25%;
+	min-width: 290px;
 	background-color:white;
 }
 .files{
@@ -131,7 +132,7 @@ display:inline-block;
 #folderControls{
 	margin-bottom:1rem;
 }
-div#folderRoot, div.folderChild{
+div.folderRoot, div.folderChild{
 	padding-left:0.5rem;
 	padding-top:0.5rem;
 }
@@ -139,7 +140,7 @@ div#folderRoot, div.folderChild{
 	font-weight:bold;
 	padding:0.5rem;
 }
-#folderRoot{
+.folderRoot{
     background-color: #d8dfe5;
 }
 #folderStructure>div.folderChild{

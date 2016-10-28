@@ -27,7 +27,7 @@
 						<form class="inline_button" action="/uploadFile" method="post" enctype="multipart/form-data" onchange="onFileSelectedForUpload(this)">
 							<div id="icon_upload_wrapper">
 								<input type="file" id="uploadFile" name="uploadFile" value="" class="icon_upload icon_button file_icon" title="upload new file into current folder">
-								<input type="hidden" id="folderPath" name="folderPath" value="TestOrdner">
+								<input type="hidden" class="folderPath" name="path" value="TestOrdner">
 							</div>
 						</form>
 						<input type="submit" value="" class="icon_delete_file icon_button file_icon inactive_icon" onclick="onclickDeleteFile()" title="delete selected file">
