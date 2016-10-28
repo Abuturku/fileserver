@@ -121,21 +121,16 @@ func deleteHandler(w http.ResponseWriter, req *http.Request) {
 
 func downloadHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println("Entering downloadHandler")
-	cookiecheck, _, _ := checkCookie(w, req)
+	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
 		path := req.FormValue("path")
+		stringarray := strings.Split(path, "/")
 		log.Println("Download File: " + path)
-//		data, err := ioutil.ReadFile("files/Niklas/users.csv")
-//		if err != nil {
-//			log.Println(err)
-//		}
-		
-		w.Header().Set("Content-Disposition", "attachment; filename=\"users.csv\"")
+ 
+		w.Header().Set("Content-Disposition", "attachment; filename=\""+stringarray[len(stringarray)-1]+"\"")
 
-		http.ServeFile(w, req, "files/Niklas/users.csv")
-		//http.ServeContent(w, req, "users", time.Now(), bytes.NewReader(data))
-		// +user.name+"/"+path
-
+		http.ServeFile(w, req, flag.Lookup("F").Value.String() + user.name + "/"+path)
+ 
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	}
