@@ -13,60 +13,6 @@ var folderForwlog = [];
 //todo catch server response instead of using hardcoded data
 function loadFolderData(data){
 	folderData = data;
-	/* //testdata
-	folderData = {
-		"Name": "Andy",
-		"Files": [{
-			"Name": ".DS_Store",
-			"Date": "2016-10-25T12:43:55+02:00",
-			"Size": 6148
-		}, {
-			"Name": "TestDatei.txt",
-			"Date": "2016-10-20T15:22:26+02:00",
-			"Size": 0
-		}],
-		"Folders": [{
-			"Name": "AndererTest",
-			"Files": [{
-				"Name": ".DS_Store",
-				"Date": "2016-10-25T12:44:06+02:00",
-				"Size": 6148123
-			}],
-			"Folders": [{
-				"Name": "AndererTest/O1",
-				"Files": [],
-				"Folders": []
-			}, {
-				"Name": "AndererTest/O2",
-				"Files": [],
-				"Folders": []
-			}]
-		}, {
-			"Name": "TestOrdner",
-			"Files": [{
-				"Name": ".DS_Store",
-				"Date": "2016-10-25T12:43:44+02:00",
-				"Size": 6148234344
-			}, {
-				"Name": "Test",
-				"Date": "2016-10-20T16:19:34+02:00",
-				"Size": 0
-			}, {
-				"Name": "TestDateiZwei.txt",
-				"Date": "2016-10-20T15:22:36+02:00",
-				"Size": 0
-			}],
-			"Folders": [{
-				"Name": "TestOrdner/Test2",
-				"Files": [{
-					"Name": "Test",
-					"Date": "2016-10-20T16:19:34+02:00",
-					"Size": 0
-				}],
-				"Folders": []
-			}]
-		}]
-	}*/
 	username = folderData.Name;
 }
 
@@ -129,7 +75,6 @@ window.onload = function () {
 
 	xmlhttp.open("GET", "/getFolderStruct", true);
 	xmlhttp.send();
-	
 	
 }
 
@@ -380,5 +325,11 @@ function onclickDeleteFile(){
 }
 	
 function onFileSelectedForUpload(form){
+	form.submit();
+}
+
+function onclickNewFolder(Form){
+	var newFolderName = prompt("Name of the new Folder:", "Example Folder");
+	document.getElementById("newFolderName").value = newFolderName;
 	form.submit();
 }

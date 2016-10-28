@@ -1,0 +1,17 @@
+Prio 1: Dialogfenster für Neuen Folder, change passwort
+
+Prio 1: hidden folder / file path fields überall ergänzen wo nötig
+
+Prio 2: Dialogfenster für lösch buttons ("sind sie sicher?")
+/*
+	var r = confirm("Press a button");
+	if (r == true) {
+		x = "You pressed OK!";
+	} else {
+		x = "You pressed Cancel!";
+	}
+*/
+
+Prio 3 : ihr gebt mir beim neu laden nach button press aktionen den folderpath zum letzten aktiven folder mit, damit der benutzer in dem ordner bleibt, in den er hochgeladen hat
+
+Prio 4: ich geb euch die navigationshistory mit und ihr gebt sie mir auch wieder damit es so scheint als wäre die seite garnicht neu geladen worden
