@@ -32,6 +32,7 @@ func StartFileserver() {
 	http.HandleFunc("/newFolder", createFolderHandler)
 	http.HandleFunc("/delete", deleteHandler)
 	http.HandleFunc("/download", downloadHandler)
+	http.HandleFunc("/wget", wgetHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("website"))))
 	err := http.ListenAndServeTLS(":"+flag.Lookup("P").Value.String(), flag.Lookup("C").Value.String(), flag.Lookup("K").Value.String(), nil)
 	if err != nil {
@@ -101,8 +102,8 @@ func createFolderHandler(w http.ResponseWriter, req *http.Request) {
 
 		path := req.FormValue("path")
 		newFolderName := req.FormValue("newFolderName")
-		log.Println("Create Folder: " + path+"/"+newFolderName)
-		createFolder(user.name + "/" + path+"/"+newFolderName)
+		log.Println("Create Folder: " + path + "/" + newFolderName)
+		createFolder(user.name + "/" + path + "/" + newFolderName)
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
@@ -128,14 +129,43 @@ func downloadHandler(w http.ResponseWriter, req *http.Request) {
 		path := req.FormValue("path")
 		stringarray := strings.Split(path, "/")
 		log.Println("Download File: " + path)
- 
+
 		w.Header().Set("Content-Disposition", "attachment; filename=\""+stringarray[len(stringarray)-1]+"\"")
 
-		http.ServeFile(w, req, flag.Lookup("F").Value.String() + user.name + "/"+path)
- 
+		http.ServeFile(w, req, flag.Lookup("F").Value.String()+user.name+"/"+path)
+
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	}
+}
+
+//wget muss mit den Parameter --no-check-certificate und --auth-no-challenge augerufen werden (am besten auch noch mit --content-disposition
+//z.B. wget --user=[username] --password=[password] --no-check-certificate --auth-no-challenge --content-disposition https://[host]:[port]/wget?path=[filepath]
+func wgetHandler(w http.ResponseWriter, req *http.Request) {
+	
+	username, password, _ := req.BasicAuth()
+	
+	user := loadUser(username)
+	
+	log.Println(user)
+	log.Println(password)
+	log.Println(username)
+	
+	if authenticate(user, password){
+		path := req.URL.Query().Get("path")
+		stringarray := strings.Split(path, "/")
+		log.Println("Download File from wget: " + path)
+	
+		w.Header().Set("Content-Disposition", "attachment; filename=\""+stringarray[len(stringarray)-1]+"\"")
+	
+		http.ServeFile(w, req, flag.Lookup("F").Value.String()+user.name+"/"+path)
+	}else{
+		
+		w.WriteHeader(401)
+	}
+	
+	
+
 }
 
 func checkCookie(w http.ResponseWriter, req *http.Request) (bool, user, http.Cookie) {
@@ -373,4 +403,5 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 		log.Println(w, "File uploaded successfully : ")
 		log.Println(w, header.Filename)
 	}
+
 }
