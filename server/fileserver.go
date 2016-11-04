@@ -33,6 +33,7 @@ func StartFileserver() {
 	http.HandleFunc("/delete", deleteHandler)
 	http.HandleFunc("/download", downloadHandler)
 	http.HandleFunc("/wget", wgetHandler)
+	http.HandleFunc("/changePw", changePasswordHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("website"))))
 	err := http.ListenAndServeTLS(":"+flag.Lookup("P").Value.String(), flag.Lookup("C").Value.String(), flag.Lookup("K").Value.String(), nil)
 	if err != nil {
@@ -142,29 +143,27 @@ func downloadHandler(w http.ResponseWriter, req *http.Request) {
 //wget muss mit den Parameter --no-check-certificate und --auth-no-challenge augerufen werden (am besten auch noch mit --content-disposition
 //z.B. wget --user=[username] --password=[password] --no-check-certificate --auth-no-challenge --content-disposition https://[host]:[port]/wget?path=[filepath]
 func wgetHandler(w http.ResponseWriter, req *http.Request) {
-	
+
 	username, password, _ := req.BasicAuth()
-	
+
 	user := loadUser(username)
-	
+
 	log.Println(user)
 	log.Println(password)
 	log.Println(username)
-	
-	if authenticate(user, password){
+
+	if authenticate(user, password) {
 		path := req.URL.Query().Get("path")
 		stringarray := strings.Split(path, "/")
 		log.Println("Download File from wget: " + path)
-	
+
 		w.Header().Set("Content-Disposition", "attachment; filename=\""+stringarray[len(stringarray)-1]+"\"")
-	
+
 		http.ServeFile(w, req, flag.Lookup("F").Value.String()+user.name+"/"+path)
-	}else{
-		
+	} else {
+
 		w.WriteHeader(401)
 	}
-	
-	
 
 }
 
@@ -403,5 +402,49 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 		log.Println(w, "File uploaded successfully : ")
 		log.Println(w, header.Filename)
 	}
+}
 
+func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
+	log.Println("changePassword")
+	cookiecheck, user, cookie := checkCookie(w, req)
+	if cookiecheck {
+		oldPW := req.FormValue("oldPassword")
+		newPW := req.FormValue("newPassword")
+		newPWToo := req.FormValue("newPassword2")
+		if newPW == newPWToo {
+			if authenticate(&user, oldPW) {
+				changePasswordInFile(&user, newPW)
+				log.Println("Set newPW in Cookie: " + user.name)
+				cookie.Expires = time.Now().Add(-1)
+				cookie.Value = ""
+				http.SetCookie(w, &cookie)
+
+				user := loadUser(user.name)
+				loginUser(user, w, req)
+			}
+		}
+	} else {
+		http.Redirect(w, req, "/", http.StatusMovedPermanently)
+	}
+}
+
+func changePasswordInFile(user *user, newPassword string) {
+	input, err := ioutil.ReadFile(flag.Lookup("L").Value.String())
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	lines := strings.Split(string(input), "\n")
+
+	for i, line := range lines {
+		if strings.Contains(line, user.name) {
+			lines[i] = ""
+		}
+	}
+	output := strings.Join(lines, "\n")
+	err = ioutil.WriteFile(flag.Lookup("L").Value.String(), []byte(output), 0644)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	createUser(user.name, newPassword)
 }
