@@ -1,7 +1,3 @@
-Prio 1: Dialogfenster für Neuen Folder, change passwort
-
-Prio 1: hidden folder / file path fields überall ergänzen wo nötig
-
 Prio 2: Dialogfenster für lösch buttons ("sind sie sicher?")
 /*
 	var r = confirm("Press a button");
