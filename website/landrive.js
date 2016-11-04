@@ -183,9 +183,13 @@ function refreshHiddenInputFieldsFolders(){
 	for (var i = 0; i < inputFields.length; i++){
 		inputFields[i].value = currentFolderPath;
 	}
+	//hidden file path fields must be empty because no file is selected
+	var filepathFields = document.getElementsByClassName("filePath");
+	for (var j = 0; j < filepathFields.length; j++){
+		filepathFields[j].value = "";
+	}
 }
 
-//TODO: input-Feld folderPath anpassen bei jedem Ordnerwechsel; alles unterhalb root ||| das selbe fuer delete mit hidden input
 function folderSelected(elem,event){
 	var folderName = elem.children[0].innerHTML;
 	
@@ -298,10 +302,11 @@ function onclickNavigateForward(){
 }
 
 function onclickFileSelected(elem){
-	//get name with (elem.children[0].innerHTML);
+	var fileName = elem.children[0].innerHTML;
+	
 	//unmark all
 	var allFiles = document.getElementById("availableFiles").children;
-	for (var i = 0; i<allFiles.length; i++){
+	for (var i = 0; i < allFiles.length; i++){
 		allFiles[i].removeAttribute("id");
 	}
 	//mark selected
@@ -310,20 +315,32 @@ function onclickFileSelected(elem){
 	//make file buttons available
 	activateButton("icon_download");
 	activateButton("icon_delete_file");
+	
+	//set filePath
+	var pathString = currentFolderPath + "/" + fileName;
+	var filepathFields = document.getElementsByClassName("filePath");
+	for (var j = 0; j < filepathFields.length; j++){
+		filepathFields[j].value = pathString;
+	}
 }
 
-function onclickDownloadFile(){
-	alert("TODO: download " + document.getElementById("selectedFile").children[0].innerHTML);
+function onclickDownloadFile(form){
+	form.submit();
 }
 
-function onclickDeleteFile(){
-	alert("TODO: delete " + document.getElementById("selectedFile").children[0].innerHTML);
+function onclickDeleteFile(form){
 	//make delete file button unavailable
 	deactivateButton("icon_delete_file");
 	deactivateButton("icon_download");
+	
+	form.submit();
 }
 	
 function onFileSelectedForUpload(form){
+	form.submit();
+}
+
+function onclickDelFolder(form){
 	form.submit();
 }
 
