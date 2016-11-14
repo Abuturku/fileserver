@@ -77,6 +77,7 @@ window.onload = function () {
 	xmlhttp.send();
 }
 
+/**backup
 function searchCurrentFolderObjectRec(childFolders){
 	var folderObj;
 	for (var i = 0; i < childFolders.length; i++){
@@ -92,13 +93,36 @@ function searchCurrentFolderObjectRec(childFolders){
 		}
 	}
 	return folderObj;
+}*/
+
+function searchCurrentFolderObjectRec(childFolders){
+	var folderObj;
+	for (var i = 0; i < childFolders.length; i++){
+		if (childFolders[i].Name === currentFolderPath){
+			return childFolders[i];
+		} else {
+			var currTest = searchCurrentFolderObjectRec(childFolders[i].Folders);
+			if(currTest != undefined){
+				folderObj = currTest;
+			}
+		}
+	}
+	return folderObj;
 }
+/*
+function searchCurrentFolderObjectViaPath(){
+	
+	//todo fix
+	var folderpath = currentFolderPath;
+	
+}*/
 
 function getCurrentFolderObject(){
 	if(document.getElementById("selectedFolder").children[0].innerHTML === "Home of "+folderData.Name){
 		return folderData;
 	}
 	return searchCurrentFolderObjectRec(folderData.Folders);
+	//return searchCurrentFolderObjectViaPath();
 }
 
 function formatFileSize(fileSizeByte){
@@ -201,15 +225,15 @@ function folderSelected(elem,event){
 	elem.id = "selectedFolder";
 	document.getElementById("folderName").innerHTML = elem.children[0].innerHTML;
 	
+	refreshCurrentFolderPath();
+	refreshHiddenInputFieldsFolders();
+	
 	//make file buttons unavailable
 	deactivateButton("icon_download");
 	deactivateButton("icon_delete_file");
 	
 	//load files of selected folder
 	loadFiles();
-	
-	refreshCurrentFolderPath();
-	refreshHiddenInputFieldsFolders();
 }
 
 function onclickFolderSelected(elem, event){
@@ -329,19 +353,29 @@ function onclickDownloadFile(form){
 }
 
 function onclickDeleteFile(form){
-	//make delete file button unavailable
-	deactivateButton("icon_delete_file");
-	deactivateButton("icon_download");
-	
-	form.submit();
+		var b = confirm("Are you sure that you want to delete the file?");
+	if (b == true) {
+		//make delete file button unavailable
+		deactivateButton("icon_delete_file");
+		deactivateButton("icon_download");
+		
+		form.submit();
+	} else {
+		alert("Deletion of file cancelled.");
+	}
 }
 	
 function onFileSelectedForUpload(form){
 	form.submit();
 }
 
-function onclickDelFolder(form){
-	form.submit();
+function onclickDeleteFolder(form){
+	var b = confirm("Are you sure that you want to delete the folder with all it's subfolders and files?");
+	if (b == true) {
+		form.submit();
+	} else {
+		alert("Deletion of folder cancelled.");
+	}
 }
 
 function cancelPwChange(){
