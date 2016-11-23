@@ -39,6 +39,7 @@ func StartFileserver() {
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
+	
 }
 
 func index(w http.ResponseWriter, req *http.Request) {
@@ -211,7 +212,7 @@ func loginUser(user *user, w http.ResponseWriter, req *http.Request) {
 	log.Println("Setting cookie")
 	http.SetCookie(w, &cookie)
 	log.Println("Redirecting to landrive")
-	http.Redirect(w, req, "/landrive", http.StatusMovedPermanently)
+	http.Redirect(w, req, "/landrive", http.StatusAccepted)
 }
 
 func newUserHandler(w http.ResponseWriter, req *http.Request) {

@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"landrive/server"
+	"github.com/Abuturku/landrive/server"
 )
 
 func main(){

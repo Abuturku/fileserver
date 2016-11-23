@@ -1,17 +1,59 @@
 package server
 
 import (
-	"github.com/stretchr/testify/assert"
+	"encoding/csv"
+	"flag"
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"testing"
+	"net/url"
 )
 
-//Die Web-Seite soll nur per HTTPS erreichbar sein.
-func TestPingPage(t *testing.T) {
+func createNewUserFile() {
+	pathToFile := "./user_test.csv"
+	if _, err := os.Stat(pathToFile); err == nil {
+		os.Remove(pathToFile)
+	}
 
+	file, err := os.Create(pathToFile)
+
+	writer := csv.NewWriter(file)
+	defer file.Close()
+
+	writer.Write([]string{"Andy", "a879518e72e3aa6d82126e52d6a641e66005d68b44a31ea5797d0e24f90fd759", "0912951feb016907a1b762c7f83de9b0"})
+	writer.Flush()
+	err = writer.Error()
+	if err != nil {
+
+	}
+	
+	flag.String("L", pathToFile, "Path to file, where usernames, passwords and salts are stored")
+	flag.String("T", "900", "Session timeout given in seconds")
+	flag.String("F", "files/" ,"Folder where all Userfiles are stored")
 }
 
-//Der Zugang soll durch Benutzernamen und Passwort geschuëtzt werden.
-func TestAcess(t *testing.T) {
+//Der Zugang soll durch Benutzernamen und Passwort geschützt werden.
+func TestAccess(t *testing.T) {
+	req, err := http.NewRequest("POST", "/login", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	
+	v := url.Values{}
+	v.Add("username", "Andy")
+	v.Add("password", "andy")
+	req.Form = v
+
+	rr := httptest.NewRecorder()
+
+	createNewUserFile()
+
+	loginHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusAccepted {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
 
 }
 
@@ -26,7 +68,7 @@ func TestCookie(t *testing.T) {
 }
 
 // Neue Nutzer sollen selbst einen Zugang anlegen ko ̈nnen.
-func TestCreatUser(t *testing.T) {
+func TestCreateUser(t *testing.T) {
 
 }
 
@@ -34,7 +76,6 @@ func TestCreatUser(t *testing.T) {
 func TestChangePassword(t *testing.T) {
 
 }
-
 
 // Es soll mo ̈glich sein, Dateien ”hochzuladen“
 func TestSaveFile(t *testing.T) {
@@ -52,7 +93,7 @@ func TestDownloadFileWGET(t *testing.T) {
 }
 
 //Es mo ̈glich sein, Dateien zu lo ̈schen.
-func TestDeletFile(t *testing.T) {
+func TestDeleteFile(t *testing.T) {
 
 }
 
@@ -60,4 +101,3 @@ func TestDeletFile(t *testing.T) {
 func TestCreateFolder(t *testing.T) {
 
 }
- 
