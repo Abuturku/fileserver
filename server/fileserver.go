@@ -131,7 +131,6 @@ func deleteHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func downloadHandler(w http.ResponseWriter, req *http.Request) {
-	log.Println("Entering downloadHandler")
 	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
 		path := req.FormValue("path")
@@ -177,10 +176,10 @@ func checkCookie(w http.ResponseWriter, req *http.Request) (bool, user, http.Coo
 	cookies := req.Cookies()
 
 	for _, cookie := range cookies {
+		
 		cookieName := cookie.Name
 		cookiePw := cookie.Value
 		user := loadUser(cookieName)
-
 		if cookiePw == hash([]string{user.name, user.password}) {
 			//following 3 lines are responsible for setting the cookie expiration date 15 minutes to the future
 			expiration := time.Now().Add(15 * time.Minute)
@@ -213,7 +212,7 @@ func loginHandler(w http.ResponseWriter, req *http.Request) {
 func loginUser(user *user, w http.ResponseWriter, req *http.Request) {
 	cookieValue := hash([]string{user.name, user.password})
 	maxAge, _ := strconv.Atoi(flag.Lookup("T").Value.String())
-	cookie := http.Cookie{Name: user.name, Value: cookieValue, MaxAge: maxAge}
+	cookie := http.Cookie{Name: user.name, Value: cookieValue, MaxAge: maxAge, Expires: time.Now().Add(15*time.Minute)}
 	log.Println("Setting cookie")
 	http.SetCookie(w, &cookie)
 	log.Println("Redirecting to landrive")
