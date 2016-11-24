@@ -106,7 +106,7 @@ func createFolderHandler(w http.ResponseWriter, req *http.Request) {
 		newFolderName := req.FormValue("newFolderName")
 		log.Println("Create Folder: " + path + "/" + newFolderName)
 		createFolder(user.name + "/" + path + "/" + newFolderName)
-		http.Redirect(w, req, "/", http.StatusMovedPermanently)
+		http.Redirect(w, req, "/", http.StatusFound)
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	}
@@ -124,7 +124,7 @@ func deleteHandler(w http.ResponseWriter, req *http.Request) {
 			log.Println("Path is empty")
 		}
 
-		http.Redirect(w, req, "/", http.StatusMovedPermanently)
+		http.Redirect(w, req, "/", http.StatusFound)
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	}

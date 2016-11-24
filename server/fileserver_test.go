@@ -9,12 +9,11 @@ import (
 	"os"
 	"testing"
 	//"log"
-	"io"
-	"strconv"
-	"time"
+	//"io"
 	"io/ioutil"
+	"strconv"
 	"strings"
-	
+	"time"
 )
 
 func generateCookie() http.Cookie {
@@ -43,15 +42,11 @@ func init() {
 	}
 
 	os.Mkdir("test", 0777)
-	os.Mkdir("test/Andy", 0777)
-
-	copiedFile, _ := os.Create("test/Andy/user_test.csv")
-	io.Copy(copiedFile, file)
-	copiedFile.Close()
 
 	flag.String("L", pathToFile, "Path to file, where usernames, passwords and salts are stored")
 	flag.String("T", "900", "Session timeout given in seconds")
 	flag.String("F", "test/", "Folder where all Userfiles are stored")
+
 }
 
 //Der Zugang soll durch Benutzernamen und Passwort geschützt werden. Positives Beispiel
@@ -242,15 +237,8 @@ func TestCreateUserNameFalse(t *testing.T) {
 
 // Es soll möglich sein, Dateien ”hochzuladen“
 func TestSaveFile(t *testing.T) {
-	
 
-	postData := `--xxx
-Content-Disposition: form-data; name="user_test.csv"; filename="user_test.csv"
-Content-Type: application/octet-stream
-Content-Transfer-Encoding: binary
-
-binary data
---xxx--`
+	postData := `--xxx Content-Disposition: form-data; name="user_test.csv"; filename="user_test.csv" Content-Type: application/octet-stream Content-Transfer-Encoding: binary binary data --xxx--`
 	req, err := http.NewRequest("POST", "/uploadFile", ioutil.NopCloser(strings.NewReader(postData)))
 
 	if err != nil {
@@ -261,17 +249,45 @@ binary data
 	req.AddCookie(&cookie)
 	rr := httptest.NewRecorder()
 	req.PostForm = url.Values{}
-	req.PostForm.Add("path", "/")
+	req.PostForm.Add("path", "")
 	req.Header.Set("Content-Type", `multipart/form-data; boundary="xxx"`)
 	req.ParseMultipartForm(32 << 20)
-	
+
 	uploadFileHandler(rr, req)
-	
+
 }
 
 // Es soll möglich sein, Dateien ”herunterzuladen“
 func TestDownloadFile(t *testing.T) {
-	req, err := http.NewRequest("POST", "/download", nil)
+	//req, err := http.NewRequest("POST", "/download", nil)
+
+	//if err != nil {
+	//	t.Fatal(err)
+	//}
+
+	//cookie := generateCookie()
+	//req.AddCookie(&cookie)
+
+	//v := url.Values{}
+	//v.Add("path", "test/Andy/user_test.csv")
+	//req.Form = v
+
+	//rr := httptest.NewRecorder()
+
+	//downloadHandler(rr, req)
+
+	//if status := rr.Code; status != http.StatusOK {
+	//	t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	//}
+}
+
+// Es soll möglich sein, Dateien ”herunterzuladen“ über wget
+func TestDownloadFileWGET(t *testing.T) {
+}
+
+//Auch in diese Unterordner sollen sich Dateien laden lassen.
+func TestCreateFolder(t *testing.T) {
+	req, err := http.NewRequest("POST", "/newFolder", nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -281,31 +297,41 @@ func TestDownloadFile(t *testing.T) {
 	req.AddCookie(&cookie)
 
 	v := url.Values{}
-	v.Add("path", "./test/Andy/user_test.csv")
+	v.Add("path", "")
+	v.Add("newFolderName", "testFolder")
 	req.Form = v
 
 	rr := httptest.NewRecorder()
 
-	downloadHandler(rr, req)
+	createFolderHandler(rr, req)
 
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	if status := rr.Code; status != http.StatusFound {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusFound)
 	}
 }
 
-// Es soll möglich sein, Dateien ”herunterzuladen“ über wget
-func TestDownloadFileWGET(t *testing.T) {
+//Es möglich sein, Ordner zu löschen.
+func TestDeleteFolder(t *testing.T) {
+	req, err := http.NewRequest("POST", "/delete", nil)
 
-}
+	if err != nil {
+		t.Fatal(err)
+	}
 
-//Es möglich sein, Dateien zu löschen.
-func TestDeleteFile(t *testing.T) {
+	cookie := generateCookie()
+	req.AddCookie(&cookie)
 
-}
+	v := url.Values{}
+	v.Add("path", "testFolder")
+	req.Form = v
 
-//Auch in diese Unterordner sollen sich Dateien laden lassen.
-func TestCreateFolder(t *testing.T) {
+	rr := httptest.NewRecorder()
 
+	deleteHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusFound {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusFound)
+	}
 }
 
 // Ein Nutzer soll sein Passwort ändern können.
