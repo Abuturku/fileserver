@@ -34,7 +34,7 @@
 								<input type="hidden" class="folderPath" name="path" value="">
 							</div>
 						</form>
-						<form class="inline_button" action="/delFile" method="post" enctype="multipart/form-data" onclick="onclickDeleteFile(this)" >
+						<form class="inline_button" action="/delete" method="post" enctype="multipart/form-data" onclick="onclickDeleteFile(this)" >
 							<input type="button" value="" class="icon_delete_file icon_button file_icon inactive_icon" title="delete selected file">
 							<input type="hidden" class="filePath" name="filePath" value="">
 						</form>
@@ -51,7 +51,7 @@
 								<input type="hidden" class="folderPath" name="path" value="">
 								<input type="hidden" id="newFolderName" name="newFolderName" value="">
 							</form>
-							<form class="inline_button" action="/delFolder" method="post" enctype="multipart/form-data" onclick="onclickDeleteFolder(this)" >
+							<form class="inline_button" action="/delete" method="post" enctype="multipart/form-data" onclick="onclickDeleteFolder(this)" >
 								<input type="button" value="" class="icon_delete_folder icon_button folder_icon inactive_icon" title="delete selected folder">
 								<input type="hidden" class="folderPath" name="path" value="">
 							</form>

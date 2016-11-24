@@ -4,5 +4,8 @@ Prio 3 : ihr gebt mir beim neu laden nach button press aktionen den
 		 in den er hochgeladen hat
 
 Prio 4: ich geb euch die navigationshistory mit und ihr gebt sie mir
-		auch wieder damit es so scheint als w�re die seite garnicht 
+		auch wieder damit es so scheint als w�re die seite garnicht 
 		neu geladen worden
+		
+Prio 1: Delete Ordner kann root selectiert und gelöscht werden
+Prio 1: Speichergröße ist sowas von Falsch

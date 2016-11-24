@@ -39,7 +39,7 @@ func StartFileserver() {
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
-	
+
 }
 
 func index(w http.ResponseWriter, req *http.Request) {
@@ -118,7 +118,11 @@ func deleteHandler(w http.ResponseWriter, req *http.Request) {
 
 		path := req.FormValue("path")
 		log.Println("delete: " + path)
-		os.RemoveAll(flag.Lookup("F").Value.String() + user.name + "/" + path)
+		if path != "" {
+			os.RemoveAll(flag.Lookup("F").Value.String() + user.name + "/" + path)
+		}else{
+			log.Println("Path is empty")
+		}
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	}
