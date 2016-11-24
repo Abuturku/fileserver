@@ -135,6 +135,12 @@ function formatFileSize(fileSizeByte){
 	if (fileSizeByte < nextSize*nextSize){
 		temp = "" + fileSizeByte/nextSize;
 		intResult = temp.split(".")[0];
+		return "" + intResult + " KB";
+	}
+	nextSize *= 1024;
+	if (fileSizeByte < nextSize*nextSize){
+		temp = "" + fileSizeByte/nextSize;
+		intResult = temp.split(".")[0];
 		return "" + intResult + " MB";
 	}
 	nextSize *= 1024;
@@ -349,19 +355,39 @@ function onclickFileSelected(elem){
 }
 
 function onclickDownloadFile(form){
-	form.submit();
+	var buttonClasses = form.children[0].getAttribute("class").split(" ");
+	var isInactive = false;
+	for(var i = 0; i < buttonClasses.length; i++){
+		if(buttonClasses[i] === "inactive_icon"){
+			isInactive = true;
+		}
+	}
+	
+	if(!isInactive){
+		form.submit();
+	}
 }
 
 function onclickDeleteFile(form){
+	var buttonClasses = form.children[0].getAttribute("class").split(" ");
+	var isInactive = false;
+	for(var i = 0; i < buttonClasses.length; i++){
+		if(buttonClasses[i] === "inactive_icon"){
+			isInactive = true;
+		}
+	}
+	
+	if(!isInactive){
 		var b = confirm("Are you sure that you want to delete the file?");
-	if (b == true) {
-		//make delete file button unavailable
-		deactivateButton("icon_delete_file");
-		deactivateButton("icon_download");
-		
-		form.submit();
-	} else {
-		alert("Deletion of file cancelled.");
+		if (b == true) {
+			//make delete file button unavailable
+			deactivateButton("icon_delete_file");
+			deactivateButton("icon_download");
+			
+			form.submit();
+		} else {
+			alert("Deletion of file cancelled.");
+		}
 	}
 }
 	
@@ -370,11 +396,21 @@ function onFileSelectedForUpload(form){
 }
 
 function onclickDeleteFolder(form){
-	var b = confirm("Are you sure that you want to delete the folder with all it's subfolders and files?");
-	if (b == true) {
-		form.submit();
-	} else {
-		alert("Deletion of folder cancelled.");
+	var buttonClasses = form.children[0].getAttribute("class").split(" ");
+	var isInactive = false;
+	for(var i = 0; i < buttonClasses.length; i++){
+		if(buttonClasses[i] === "inactive_icon"){
+			isInactive = true;
+		}
+	}
+	
+	if(!isInactive){
+		var b = confirm("Are you sure that you want to delete the folder with all it's subfolders and files?");
+		if (b == true) {
+			form.submit();
+		} else {
+			alert("Deletion of folder cancelled.");
+		}
 	}
 }
 
