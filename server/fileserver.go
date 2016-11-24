@@ -120,9 +120,11 @@ func deleteHandler(w http.ResponseWriter, req *http.Request) {
 		log.Println("delete: " + path)
 		if path != "" {
 			os.RemoveAll(flag.Lookup("F").Value.String() + user.name + "/" + path)
-		}else{
+		} else {
 			log.Println("Path is empty")
 		}
+
+		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	}
@@ -166,7 +168,6 @@ func wgetHandler(w http.ResponseWriter, req *http.Request) {
 
 		http.ServeFile(w, req, flag.Lookup("F").Value.String()+user.name+"/"+path)
 	} else {
-
 		w.WriteHeader(401)
 	}
 
@@ -216,7 +217,7 @@ func loginUser(user *user, w http.ResponseWriter, req *http.Request) {
 	log.Println("Setting cookie")
 	http.SetCookie(w, &cookie)
 	log.Println("Redirecting to landrive")
-	http.Redirect(w, req, "/landrive", http.StatusAccepted)
+	http.Redirect(w, req, "/landrive", http.StatusFound)
 }
 
 func newUserHandler(w http.ResponseWriter, req *http.Request) {
@@ -428,9 +429,9 @@ func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
 				loginUser(user, w, req)
 			}
 		}
-	} else {
-		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	}
+	http.Redirect(w, req, "/", http.StatusMovedPermanently)
+
 }
 
 func changePasswordInFile(user *user, newPassword string) {

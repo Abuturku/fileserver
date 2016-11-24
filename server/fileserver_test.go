@@ -5,12 +5,12 @@ import (
 	"flag"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"testing"
-	"net/url"
 )
 
-func createNewUserFile() {
+func init() {
 	pathToFile := "./user_test.csv"
 	if _, err := os.Stat(pathToFile); err == nil {
 		os.Remove(pathToFile)
@@ -27,19 +27,19 @@ func createNewUserFile() {
 	if err != nil {
 
 	}
-	
+
 	flag.String("L", pathToFile, "Path to file, where usernames, passwords and salts are stored")
 	flag.String("T", "900", "Session timeout given in seconds")
-	flag.String("F", "files/" ,"Folder where all Userfiles are stored")
+	flag.String("F", "files/", "Folder where all Userfiles are stored")
 }
 
-//Der Zugang soll durch Benutzernamen und Passwort geschützt werden.
+//Der Zugang soll durch Benutzernamen und Passwort geschützt werden. Positives Beispiel
 func TestAccess(t *testing.T) {
 	req, err := http.NewRequest("POST", "/login", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	v := url.Values{}
 	v.Add("username", "Andy")
 	v.Add("password", "andy")
@@ -47,23 +47,75 @@ func TestAccess(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	createNewUserFile()
-
 	loginHandler(rr, req)
 
-	if status := rr.Code; status != http.StatusAccepted {
+	if status := rr.Code; status != http.StatusFound {
 		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 
 }
 
-//Die Passwoerter duërfen nicht im Klartext gespeichert werden.
-func TestPassword(t *testing.T) {
+//Der Zugang soll durch Benutzernamen und Passwort geschützt werden. Negatives Beispiel: FalschesPassword
+func TestAccessWrongPassword(t *testing.T) {
+	req, err := http.NewRequest("POST", "/login", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 
+	v := url.Values{}
+	v.Add("username", "Andy")
+	v.Add("password", "andy1")
+	req.Form = v
+
+	rr := httptest.NewRecorder()
+
+	loginHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusMovedPermanently {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+}
+
+//Der Zugang soll durch Benutzernamen und Passwort geschützt werden. Negatives Beispiel: User exestiert nicht
+func TestAccessUserDoesntExist(t *testing.T) {
+	req, err := http.NewRequest("POST", "/login", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v := url.Values{}
+	v.Add("username", "Andy1")
+	v.Add("password", "andy")
+	req.Form = v
+
+	rr := httptest.NewRecorder()
+
+	loginHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusMovedPermanently {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
 }
 
 //Zur weiteren Identifikation des Nutzers soll ein Session-ID Cookie ver- wendet werden.
 func TestCookie(t *testing.T) {
+	req, err := http.NewRequest("POST", "/login", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v := url.Values{}
+	v.Add("username", "Andy")
+	v.Add("password", "andy")
+	req.Form = v
+
+	rr := httptest.NewRecorder()
+
+	loginHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusFound {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
 
 }
 
