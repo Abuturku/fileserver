@@ -25,7 +25,7 @@
 					<div id="buttongroup2">					
 						<form class="inline_button" action="/download" method="post" enctype="multipart/form-data" onclick="onclickDownloadFile(this)" >
 							<input type="button" value="" class="icon_download icon_button file_icon inactive_icon" title="download selected file">
-							<input type="hidden" class="filePath" name="filePath" value="">
+							<input type="hidden" class="filePath" name="path" value="">
 						</form>
 						<!--input type="submit" value="" class="icon_download icon_button file_icon inactive_icon" onclick="()" title="download selected file"-->
 						<form class="inline_button" action="/uploadFile" method="post" enctype="multipart/form-data" onchange="onFileSelectedForUpload(this)">
@@ -36,7 +36,7 @@
 						</form>
 						<form class="inline_button" action="/delete" method="post" enctype="multipart/form-data" onclick="onclickDeleteFile(this)" >
 							<input type="button" value="" class="icon_delete_file icon_button file_icon inactive_icon" title="delete selected file">
-							<input type="hidden" class="filePath" name="filePath" value="">
+							<input type="hidden" class="filePath" name="path" value="">
 						</form>
 						<!--input type="submit" value="" class="icon_delete_file icon_button file_icon inactive_icon" onclick="()" title="delete selected file"-->
 					</div>
