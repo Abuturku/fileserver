@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"server"
+	"src/server"
 )
 
 func main(){

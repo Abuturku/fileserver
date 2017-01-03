@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"github.com/stretchr/testify/assert"
+
 )
 
 func generateCookie() http.Cookie {
@@ -235,11 +237,51 @@ func TestCreateUserNameFalse(t *testing.T) {
 	}
 }
 
-// Es soll möglich sein, Dateien ”hochzuladen“
-func TestSaveFile(t *testing.T) {
 
-	postData := `--xxx Content-Disposition: form-data; name="user_test.csv"; filename="user_test.csv" Content-Type: application/octet-stream Content-Transfer-Encoding: binary binary data --xxx--`
-	req, err := http.NewRequest("POST", "/uploadFile", ioutil.NopCloser(strings.NewReader(postData)))
+// An https://golang.org/src/net/http/request_test.go orientiert
+const testMessage =  `
+ --MyBoundary
+ Content-Disposition: form-data; name="uploadFile"; filename="filea.txt"
+ Content-Type: text/plain
+ This is a test file.
+ --MyBoundary
+ Content-Disposition: form-data; name="text"
+ foo
+ --MyBoundary--`
+
+// Es soll möglich sein, Dateien ”hochzuladen“
+func TestSaveFile(t *testing.T){
+	postData := strings.NewReader(strings.Replace(testMessage, "\n", "\r\n", -1))
+
+	req, err := http.NewRequest("POST", "/uploadFile", postData)
+
+	if err != nil {
+
+		t.Fatal("NewRequest:", err)
+
+	}
+
+	cookie := generateCookie()
+	req.AddCookie(&cookie)
+	req.PostForm = url.Values{}
+	req.PostForm.Add("path", "")
+	req.Header.Set("Content-type", `multipart/form-data; boundary="MyBoundary"`)
+
+	rr := httptest.NewRecorder()
+	,,c := req.FormFile("uploadFile")
+
+	t.Log(c)
+
+	uploadFileHandler(rr, req)
+
+	if _, err := os.Stat(flag.Lookup("F").Value.String() + cookie.Name +"/filea.txt"); os.IsNotExist(err) {
+		t.Error("Error while saving")
+	}
+}
+
+// Es soll möglich sein, Dateien ”herunterzuladen“
+func TestDownloadFile(t *testing.T) {
+	req, err := http.NewRequest("POST", "/download", nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -247,42 +289,137 @@ func TestSaveFile(t *testing.T) {
 
 	cookie := generateCookie()
 	req.AddCookie(&cookie)
+
+	v := url.Values{}
+	v.Add("path", "user_test.csv")
+	req.Form = v
+
 	rr := httptest.NewRecorder()
-	req.PostForm = url.Values{}
-	req.PostForm.Add("path", "")
-	req.Header.Set("Content-Type", `multipart/form-data; boundary="xxx"`)
-	req.ParseMultipartForm(32 << 20)
 
-	uploadFileHandler(rr, req)
+	downloadHandler(rr, req)
 
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
 }
 
-// Es soll möglich sein, Dateien ”herunterzuladen“
-func TestDownloadFile(t *testing.T) {
-	//req, err := http.NewRequest("POST", "/download", nil)
+func TestDownloadFileNotLoggedIn(t *testing.T) {
+	req, err := http.NewRequest("POST", "/download", nil)
 
-	//if err != nil {
-	//	t.Fatal(err)
-	//}
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	//cookie := generateCookie()
-	//req.AddCookie(&cookie)
+	rr := httptest.NewRecorder()
 
-	//v := url.Values{}
-	//v.Add("path", "test/Andy/user_test.csv")
-	//req.Form = v
+	downloadHandler(rr, req)
 
-	//rr := httptest.NewRecorder()
-
-	//downloadHandler(rr, req)
-
-	//if status := rr.Code; status != http.StatusOK {
-	//	t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
-	//}
+	if status := rr.Code; status != http.StatusMovedPermanently {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
+	}
 }
 
 // Es soll möglich sein, Dateien ”herunterzuladen“ über wget
-func TestDownloadFileWGET(t *testing.T) {
+func TestDownloadFileWGETValidFile(t *testing.T) {
+	req, err := http.NewRequest("GET", "/wget?path=./user_test.csv", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req.SetBasicAuth("Andy", "andy")
+
+	rr := httptest.NewRecorder()
+	wgetHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+}
+
+func TestDownloadFileWGETUnvalidFile(t *testing.T) {
+	req, err := http.NewRequest("GET", "/wget?path=./user_test1.csv", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req.SetBasicAuth("Andy", "andy")
+
+	rr := httptest.NewRecorder()
+	wgetHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusNotFound {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusNotFound)
+	}
+}
+
+func TestDownloadFileWGETUnvalidAccount(t *testing.T) {
+	req, err := http.NewRequest("GET", "/wget?path=./user_test.csv", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req.SetBasicAuth("Andy", "andy1")
+
+	rr := httptest.NewRecorder()
+	wgetHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusUnauthorized {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusUnauthorized)
+	}
+}
+
+func TestWithoutPW(t *testing.T) {
+	ts := createServer(func(user, pwd string) bool {
+		return true
+	})
+	defer ts.Close()
+	res, err := http.Get(ts.URL)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusUnauthorized, res.StatusCode, "wrong status")
+	body, err := ioutil.ReadAll(res.Body)
+	assert.NoError(t, err)
+	assert.Equal(t,
+		http.StatusText(http.StatusUnauthorized)+"\n",
+		string(body), "wrong message")
+}
+
+func TestWithWrongPWBasicAuth(t *testing.T) {
+	var receivedName, receivedPw string
+	ts := createServer(func(user, pwd string) bool {
+		receivedName = user
+		receivedPw = pwd
+		return false // <--- deny every request
+	})
+	defer ts.Close()
+	res := doRequestWithPassword(t, ts.URL)
+	assert.Equal(t, http.StatusUnauthorized, res.StatusCode, "wrong status")
+	assert.Equal(t, "Andy", receivedName, "wrong username")
+	assert.Equal(t, "1234", receivedPw, "wrong password")
+	body, err := ioutil.ReadAll(res.Body)
+	assert.NoError(t, err)
+	assert.Equal(t,
+		http.StatusText(http.StatusUnauthorized)+"\n",
+		string(body), "wrong message")
+}
+
+func TestWithCorrectPW(t *testing.T) {
+	var receivedName, receivedPwd string
+	ts := createServer(func(user, pwd string) bool {
+		receivedName = user
+		receivedPwd = pwd
+		return true // <--- accept every request
+	})
+	defer ts.Close()
+	res := doRequestWithPassword(t, ts.URL)
+	assert.Equal(t, http.StatusOK, res.StatusCode, "wrong status code")
+	assert.Equal(t, "Andy", receivedName, "wrong username")
+	assert.Equal(t, "1234", receivedPwd, "wrong password")
+	body, err := ioutil.ReadAll(res.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, "Hello client\n", string(body), "wrong message")
 }
 
 //Auch in diese Unterordner sollen sich Dateien laden lassen.
@@ -310,6 +447,23 @@ func TestCreateFolder(t *testing.T) {
 	}
 }
 
+func TestCreateFolderNotLoggedIn(t *testing.T) {
+	req, err := http.NewRequest("POST", "/newFolder", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+
+	rr := httptest.NewRecorder()
+
+	createFolderHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusMovedPermanently {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
+	}
+}
+
 //Es möglich sein, Ordner zu löschen.
 func TestDeleteFolder(t *testing.T) {
 	req, err := http.NewRequest("POST", "/delete", nil)
@@ -334,6 +488,130 @@ func TestDeleteFolder(t *testing.T) {
 	}
 }
 
+func TestDeleteFolderNotLoggedIn(t *testing.T) {
+	req, err := http.NewRequest("POST", "/delete", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+
+	deleteHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusMovedPermanently {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
+	}
+}
+
+func TestDeleteFolderPathEmpty(t *testing.T) {
+	req, err := http.NewRequest("POST", "/delete", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cookie := generateCookie()
+	req.AddCookie(&cookie)
+
+	v := url.Values{}
+	v.Add("path", "")
+	req.Form = v
+
+	rr := httptest.NewRecorder()
+
+	deleteHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusFound {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusFound)
+	}
+}
+
+func TestIndexHandlerLoggedIn(t *testing.T){
+	req, err := http.NewRequest("GET", "/", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cookie := generateCookie()
+	req.AddCookie(&cookie)
+
+	rr := httptest.NewRecorder()
+	index(rr, req)
+
+	if status := rr.Code; status != http.StatusMovedPermanently {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
+	}
+}
+
+func TestFolderStructHandlerLoggedIn(t *testing.T){
+	req, err := http.NewRequest("GET", "/getFolderStruct", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cookie := generateCookie()
+	req.AddCookie(&cookie)
+
+	rr := httptest.NewRecorder()
+	folderStructHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+}
+
+func TestFolderStructHandlerNotLoggedIn(t *testing.T){
+	req, err := http.NewRequest("GET", "/getFolderStruct", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+	folderStructHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusMovedPermanently {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
+	}
+}
+
+func TestLogoutHandlerLoggedIn(t *testing.T){
+	req, err := http.NewRequest("GET", "/logout", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cookie := generateCookie()
+	req.AddCookie(&cookie)
+
+	rr := httptest.NewRecorder()
+	logoutHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusMovedPermanently {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
+	}
+}
+
+func TestLogoutHandlerNotLoggedIn(t *testing.T){
+	req, err := http.NewRequest("GET", "/logout", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+	logoutHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusNotModified {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusNotModified)
+	}
+}
+
+
 // Ein Nutzer soll sein Passwort ändern können.
 func TestChangePasswordValid(t *testing.T) {
 	req, err := http.NewRequest("POST", "/changePw", nil)
@@ -357,5 +635,23 @@ func TestChangePasswordValid(t *testing.T) {
 
 	if status := rr.Code; status != http.StatusFound {
 		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusFound)
+	}
+}
+
+func TestLandriveHandlerLoggedIn(t *testing.T){
+	req, err := http.NewRequest("GET", "/landrive", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cookie := generateCookie()
+	req.AddCookie(&cookie)
+
+	rr := httptest.NewRecorder()
+	landrive(rr, req)
+
+	if status := rr.Code; status != http.StatusMovedPermanently {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
 	}
 }

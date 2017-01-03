@@ -78,3 +78,6 @@ $RECYCLE.BIN/
 .idea/vcs.xml
 .idea/workspace.xml
 landrive.iml
+.idea/libraries/GOPATH__src_.xml
+src.iml
+src.iml

@@ -18,7 +18,17 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"testing"
+	"github.com/stretchr/testify/assert"
+	"net/http/httptest"
 )
+
+var AuthenticatorVar Authenticator = (Authenticator)(&AuthenticatorStruct{})
+
+type AuthenticatorStruct struct{
+	AuthenticatorFunc
+
+}
 
 func StartFileserver() {
 	log.Println("Server Startet")
@@ -44,6 +54,7 @@ func StartFileserver() {
 
 func index(w http.ResponseWriter, req *http.Request) {
 	cookiecheck, _, _ := checkCookie(w, req)
+	log.Println(cookiecheck)
 	if cookiecheck {
 		http.Redirect(w, req, "/landrive", http.StatusMovedPermanently)
 	} else {
@@ -94,7 +105,7 @@ func logoutHandler(w http.ResponseWriter, req *http.Request) {
 		http.SetCookie(w, &cookie)
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	} else {
-		http.Redirect(w, req, "/", http.StatusMovedPermanently)
+		http.Redirect(w, req, "/", http.StatusNotModified)
 	}
 }
 
@@ -154,11 +165,9 @@ func wgetHandler(w http.ResponseWriter, req *http.Request) {
 
 	user := loadUser(username)
 
-	log.Println(user)
-	log.Println(password)
-	log.Println(username)
+	log.Println("testing wget")
 
-	if authenticate(user, password) {
+	if AuthenticatorVar.Authenticate(user, password) {
 		path := req.URL.Query().Get("path")
 		stringarray := strings.Split(path, "/")
 		log.Println("Download File from wget: " + path)
@@ -199,7 +208,7 @@ func loginHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println("User:", username, "Password:", password)
 	user := loadUser(username)
 	log.Println("Found user: ", user)
-	authenticationSuccessful := authenticate(user, password)
+	authenticationSuccessful := AuthenticatorVar.Authenticate(user, password)
 
 	if authenticationSuccessful {
 		loginUser(user, w, req)
@@ -291,6 +300,7 @@ type user struct {
 
 func loadUser(username string) *user {
 	f, _ := os.Open(flag.Lookup("L").Value.String())
+
 	r := csv.NewReader(f)
 	defer f.Close()
 	for {
@@ -301,21 +311,22 @@ func loadUser(username string) *user {
 		if record[0] == username {
 			return &user{name: record[0], password: record[1], salt: record[2]}
 		}
-		//log.Println(record)
+		log.Println(record[0], username)
+		log.Println(record[0] == username)
 	}
 	return &user{name: "", password: "", salt: ""}
 }
 
-func authenticate(user *user, password string) bool {
+func (a AuthenticatorFunc) Authenticate(user *user, password string) bool {
 	//hasher := sha256.New()
 	//hasher.Write([]byte(password))
 	//hasher.Write([]byte(user.salt))
-
 	hash := hash([]string{password, user.salt})
 
 	if hash == user.password {
 		return true
 	}
+
 	return false
 }
 
@@ -410,6 +421,7 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
+
 	log.Println("changePassword")
 	cookiecheck, user, cookie := checkCookie(w, req)
 	if cookiecheck {
@@ -417,7 +429,7 @@ func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
 		newPW := req.FormValue("newPassword")
 		newPWToo := req.FormValue("newPassword2")
 		if newPW == newPWToo {
-			if authenticate(&user, oldPW) {
+			if AuthenticatorVar.Authenticate(&user, oldPW) {
 				changePasswordInFile(&user, newPW)
 				log.Println("Set newPW in Cookie: " + user.name)
 				cookie.Expires = time.Now().Add(-1)
@@ -452,4 +464,55 @@ func changePasswordInFile(user *user, newPassword string) {
 		log.Fatalln(err)
 	}
 	createUser(user.name, newPassword)
+}
+
+func doRequestWithPassword(t *testing.T, url string) *http.Response {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url, nil)
+	assert.NoError(t, err)
+	req.SetBasicAuth("Andy", "1234")
+	res, err := client.Do(req)
+	assert.NoError(t, err)
+	return res
+}
+
+
+func createServer (auth AuthenticatorFuncBasic) *httptest.Server{
+	return httptest.NewServer(WrapperBasic(auth, func(w http.ResponseWriter, r *http.Request){
+		fmt.Fprintln(w, "Hello client")
+	}))
+}
+
+type Authenticator interface {
+	Authenticate(user *user, password string) bool
+}
+
+type AuthenticatorFunc func(user *user, password string) bool
+
+
+type AuthenticatorBasic interface{
+	AuthenticateBasic(user, password string) bool
+}
+
+type AuthenticatorFuncBasic func(user, password string) bool
+
+func (af AuthenticatorFuncBasic) AuthenticateBasic(user, password string) bool {
+	return af(user, password)
+}
+
+
+func WrapperBasic(authenticator AuthenticatorBasic, handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user, pswd, ok := r.BasicAuth()
+
+		if ok && authenticator.AuthenticateBasic(user, pswd) {
+			handler(w, r)
+		} else {
+			w.Header().Set("WWW-Authenticate",
+				"Basic realm=\"My Simple Server\"")
+			http.Error(w,
+				http.StatusText(http.StatusUnauthorized),
+				http.StatusUnauthorized)
+		}
+	}
 }
