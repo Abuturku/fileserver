@@ -1,7 +1,9 @@
-//todo not hard coded!
+/**
+  * @author Andreas Schick (2792119), Linda Latreider (7743782), Niklas Nikisch (9364290)
+  */
+
 var depthOfFoldersUnderRoot = 0;
-//todo not hard coded!
-var username = "Max Muster";
+var username = "User";
 
 var folderData;
 var currentFolderPath = "";
@@ -10,7 +12,7 @@ var folderBacklog = [];
 var currentFolder;
 var folderForwlog = [];
 
-//todo catch server response instead of using hardcoded data
+//initialize data of the folders, user, files
 function loadFolderData(data){
 	folderData = data;
 	username = folderData.Name;
@@ -109,20 +111,12 @@ function searchCurrentFolderObjectRec(childFolders){
 	}
 	return folderObj;
 }
-/*
-function searchCurrentFolderObjectViaPath(){
-	
-	//todo fix
-	var folderpath = currentFolderPath;
-	
-}*/
 
 function getCurrentFolderObject(){
 	if(document.getElementById("selectedFolder").children[0].innerHTML === "Home of "+folderData.Name){
 		return folderData;
 	}
 	return searchCurrentFolderObjectRec(folderData.Folders);
-	//return searchCurrentFolderObjectViaPath();
 }
 
 function formatFileSize(fileSizeByte){

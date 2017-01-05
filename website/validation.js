@@ -1,3 +1,7 @@
+/**
+  * @author Andreas Schick (2792119), Linda Latreider (7743782), Niklas Nikisch (9364290)
+  */
+
 window.addEventListener("DOMContentLoaded", function(){
 	//document.getElementById("loginButton").onclick(onClickLoginProcess);
 	//document.getElementById("registerButton").onclick(onClickRegisterProcess);
