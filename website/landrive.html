@@ -74,29 +74,29 @@
 					</div>
 				</td>
 			</tr>
-		</table>
-		<div id="pwChngDialog" class="hidden">
-			<div id="pwcFormContainer">
-				<h3 class="start">Change Password</h3>
-				<form action="/changePw" method="post">
-					<span>
-						<label for="cpw_op">Old password:</label>
-						<input type="password" name="oldPassword" id="cpw_op" class="cpw_input">
-					</span>
-					<span>
-						<label for="cpw_np1">New password:</label>
-						<input type="password" name="newPassword" id="cpw_np1" class="cpw_input">
-					</span>
-					<span>
-						<label for="cpw_np2">Repeat new password:</label>
-						<input type="password" name="newPassword2" id="cpw_np2" class="cpw_input">
-					</span>
-					<div>
-						<input type="button" onclick="cancelPwChange()" value="Cancel" class="index_button">
-						<input type="submit" value="Change Password" class="index_button">
-					</div>
-				</form>
+			<div id="pwChngDialog" class="hidden">
+				<div id="pwcFormContainer">
+					<h3 class="start">Change Password</h3>
+					<form action="/changePw" method="post">
+						<span>
+							<label for="cpw_op">Old password:</label>
+							<input type="password" name="oldPassword" id="cpw_op" class="cpw_input">
+						</span>
+						<span>
+							<label for="cpw_np1">New password:</label>
+							<input type="password" name="newPassword" id="cpw_np1" class="cpw_input">
+						</span>
+						<span>
+							<label for="cpw_np2">Repeat new password:</label>
+							<input type="password" name="newPassword2" id="cpw_np2" class="cpw_input">
+						</span>
+						<div>
+							<input type="button" onclick="cancelPwChange()" value="Cancel" class="index_button">
+							<input type="submit" value="Change Password" class="index_button">
+						</div>
+					</form>
+				</div>
 			</div>
-		</div>
+		</table>
 	</body>
 </html>
