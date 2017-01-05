@@ -25,21 +25,21 @@
 					</div>
 					<div id="buttongroup2">					
 						<form class="inline_button" action="/download" method="post" enctype="multipart/form-data" onclick="onclickDownloadFile(this)" >
-							<input type="button" value="" class="icon_download icon_button file_icon inactive_icon" title="download selected file">
+							<input type="button" value=" " class="icon_download icon_button file_icon inactive_icon" title="download selected file">
 							<input type="hidden" class="filePath" name="path" value="">
 						</form>
-						<!--input type="submit" value="" class="icon_download icon_button file_icon inactive_icon" onclick="()" title="download selected file"-->
+						
 						<form class="inline_button" action="/uploadFile" method="post" enctype="multipart/form-data" onchange="onFileSelectedForUpload(this)">
 							<div id="icon_upload_wrapper">
-								<input type="file" id="uploadFile" name="uploadFile" value="" class="icon_upload icon_button file_icon" title="upload new file into current folder">
+								<input type="file" id="uploadFile" name="uploadFile" class="icon_upload icon_button file_icon" title="upload new file into current folder">
 								<input type="hidden" class="folderPath" name="path" value="">
 							</div>
 						</form>
 						<form class="inline_button" action="/delete" method="post" enctype="multipart/form-data" onclick="onclickDeleteFile(this)" >
-							<input type="button" value="" class="icon_delete_file icon_button file_icon inactive_icon" title="delete selected file">
+							<input type="button" value=" " class="icon_delete_file icon_button file_icon inactive_icon" title="delete selected file">
 							<input type="hidden" class="filePath" name="path" value="">
 						</form>
-						<!--input type="submit" value="" class="icon_delete_file icon_button file_icon inactive_icon" onclick="()" title="delete selected file"-->
+						
 					</div>
 				</th>
 			</tr>
@@ -48,12 +48,12 @@
 					<div id="folderField">
 						<div id="folderControls">
 							<form class="inline_button" action="/newFolder" method="post" enctype="multipart/form-data" onclick="onclickNewFolder(this)" >
-								<input type="button" value="" class="icon_new icon_button folder_icon" title="create new folder">
-								<input type="hidden" class="folderPath" name="path" value="">
-								<input type="hidden" id="newFolderName" name="newFolderName" value="">
+								<input type="button" value=" " class="icon_new icon_button folder_icon" title="create new folder">
+								<input type="hidden" class="folderPath" id="newFolderParentPath" value="">
+								<input type="hidden" id="newFolderName" name="path" value="">
 							</form>
 							<form class="inline_button" action="/delete" method="post" enctype="multipart/form-data" onclick="onclickDeleteFolder(this)" >
-								<input type="button" value="" class="icon_delete_folder icon_button folder_icon inactive_icon" title="delete selected folder">
+								<input type="button" value=" " class="icon_delete_folder icon_button folder_icon inactive_icon" title="delete selected folder">
 								<input type="hidden" class="folderPath" name="path" value="">
 							</form>
 							<input type="submit" value="" onclick="onclickChangePw()" class="icon_change_pw icon_button folder_icon" title="change password">
@@ -74,21 +74,21 @@
 					</div>
 				</td>
 			</tr>
-		</div>
+		</table>
 		<div id="pwChngDialog" class="hidden">
 			<div id="pwcFormContainer">
 				<h3 class="start">Change Password</h3>
 				<form action="/changePw" method="post">
 					<span>
-						<label for="oldPassword">Old password:</label>
+						<label for="cpw_op">Old password:</label>
 						<input type="password" name="oldPassword" id="cpw_op" class="cpw_input">
 					</span>
 					<span>
-						<label for="newPassword">New password:</label>
+						<label for="cpw_np1">New password:</label>
 						<input type="password" name="newPassword" id="cpw_np1" class="cpw_input">
 					</span>
 					<span>
-						<label for="newPassword2">Repeat new password:</label>
+						<label for="cpw_np2">Repeat new password:</label>
 						<input type="password" name="newPassword2" id="cpw_np2" class="cpw_input">
 					</span>
 					<div>

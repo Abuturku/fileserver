@@ -399,7 +399,7 @@ function onclickDeleteFolder(form){
 	}
 	
 	if(!isInactive){
-		var b = confirm("Are you sure that you want to delete the folder with all it's subfolders and files?");
+		var b = confirm("Are you sure that you want to delete the folder with all its subfolders and files?");
 		if (b == true) {
 			form.submit();
 		} else {
@@ -422,6 +422,9 @@ function onclickChangePw(){
 
 function onclickNewFolder(form){
 	var newFolderName = prompt("Name of the new Folder:", "Example Folder");
-	document.getElementById("newFolderName").value = newFolderName;
-	form.submit();
+	if(newFolderName!= null){
+		var newFolderPath = document.getElementById("newFolderParentPath").value + "/" + newFolderName;
+		document.getElementById("newFolderName").value = newFolderPath;
+		form.submit();
+	}
 }

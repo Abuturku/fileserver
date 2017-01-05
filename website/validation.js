@@ -24,16 +24,16 @@ window.addEventListener("DOMContentLoaded", function(){
 	window.onload=function validate(){
 		var message = "none";
 		if(getUrlParameter("register")==="userfalse"){
-			var message="Registrierung fehlgeschlagen. Benutzername bereits vergeben.";
+			var message="Registration failed. Username already in use.";
 			document.getElementById("r_username").style.backgroundColor="lightpink";
 		}
 		if(getUrlParameter("register")==="pwfalse"){
-			var message="Registrierung fehlgeschlagen. Passwortwiederholung nicht korrekt.";
+			var message="Registration failed. Passwords do not match.";
 			document.getElementById("r_password").style.backgroundColor="lightpink";
 			document.getElementById("r_password2").style.backgroundColor="lightpink";
 		}
 		if(getUrlParameter("login")==="false"){
-			var message="Anmeldung fehlgeschlagen. Nutzername oder Passwort nicht korrekt.";
+			var message="Login failed. Username and/or password are/is incorrect.";
 			document.getElementById("l_username").style.backgroundColor="lightpink";
 			document.getElementById("l_password").style.backgroundColor="lightpink";
 		}
@@ -44,7 +44,7 @@ window.addEventListener("DOMContentLoaded", function(){
 			messagefield.innerHTML = message;
 		} else {
 			messagefield.style.display='none';
-			document.getElementById(errormessage).setActive(false);
+			//document.getElementById("errormessage").setActive(false);
 		}
 	}
 })
