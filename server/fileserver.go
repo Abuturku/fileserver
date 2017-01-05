@@ -265,7 +265,7 @@ func loginUser(user *user, w http.ResponseWriter, req *http.Request) {
 }
 
 /*
-Regestriert einen User. Prüft
+Regestriert einen User. Prüft ob beide Passwörter gleich sind und ob es den User noch nicht gibt
 */
 func newUserHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println("User tried to register")
@@ -287,6 +287,9 @@ func newUserHandler(w http.ResponseWriter, req *http.Request) {
 
 }
 
+/*
+Fügt einen User der CSV Datei auf dem Server hinzu
+ */
 func createUser(username string, password string) user {
 	salt := generateSalt()
 	hashedPw := hash([]string{password, salt})
@@ -314,11 +317,9 @@ func createUser(username string, password string) user {
 	return user{name: username, password: hashedPw, salt: salt}
 }
 
-type Page struct {
-	Title string
-	Body  []byte
-}
-
+/*
+Generiert einen zufälligen Wert. Den Salt
+*/
 func generateSalt() string {
 	saltSize := 16
 	buf := make([]byte, saltSize)
@@ -331,12 +332,18 @@ func generateSalt() string {
 	return hex.EncodeToString(buf)
 }
 
+/*
+Repräsentiert den User
+*/
 type user struct {
 	name     string
 	password string
 	salt     string
 }
 
+/*
+Läd den User aus der CSV Datei, die im Server Liegt
+*/
 func loadUser(username string) *user {
 	f, _ := os.Open(flag.Lookup("L").Value.String())
 
@@ -369,6 +376,7 @@ func (a AuthenticatorFunc) Authenticate(user *user, password string) bool {
 	return false
 }
 
+
 func hash(strings []string) string {
 	hasher := sha256.New()
 	for _, value := range strings {
@@ -377,10 +385,15 @@ func hash(strings []string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
+/*
+Erstellt einen Ordner
+*/
 func createFolder(path string) {
 	os.Mkdir(flag.Lookup("F").Value.String()+path, 0777)
 }
 
+/*
+*/
 type Folder struct {
 	Name    string
 	Files   []File
@@ -477,11 +490,15 @@ func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
 
 				user := loadUser(user.name)
 				loginUser(user, w, req)
+			} else {
+				http.Redirect(w, req, "?change=oldPwFalse", http.StatusMovedPermanently)
 			}
+		} else {
+			http.Redirect(w, req, "?change=pwRepeatFalse", http.StatusMovedPermanently)
 		}
+	} else {
+		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, req, "/", http.StatusMovedPermanently)
-
 }
 
 func changePasswordInFile(user *user, newPassword string) {
