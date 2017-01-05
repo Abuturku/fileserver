@@ -65,6 +65,10 @@ function generateFolderStructure(){
 	}
 	
 window.onload = function () {
+	//check change pw response
+	if(getUrlParameter("change")==="oldPwFalse"){
+		alert("it works!");		
+	}
 	//catch server response
 	var xmlhttp = new XMLHttpRequest();
 	xmlhttp.onreadystatechange = function() {
