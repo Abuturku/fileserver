@@ -1,3 +1,4 @@
+//Authors: Andreas Schick (2792119), Linda Latreider (7743782), Niklas Nikisch (9364290)
 package main
 
 import (
@@ -5,6 +6,9 @@ import (
 	"src/server"
 )
 
+/*
+Main Methode setzt alle Startparameter und startet anschließend des Server
+*/
 func main(){
 	flag.String("P", "1234", "The port of the server")
 	flag.String("K","server/server.key","Path to key file")
