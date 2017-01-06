@@ -489,6 +489,15 @@ function onclickDeleteFile(form){
  * upload a file after it has been selected
  */
 function onFileSelectedForUpload(form){
+	var pathString = form.children[0].children[0].value;//.replace(/\\\\/g, '\\');
+	//replace(/\\/g,"/")
+//	= form.children[0].children[0].value.replace("\\\\", "\\");
+	/*for(var i = 0; i < pathString.length; i ++){
+		pathString = pathString.replace("\\", String.fromCharCode(92));
+	}*/
+	var nameParts = pathString.split("\\");
+	var documentName = nameParts.pop();
+	document.getElementById("fileNameUpload").value = documentName;
 	form.submit();
 }
 

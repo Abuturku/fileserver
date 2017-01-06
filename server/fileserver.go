@@ -477,8 +477,9 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 		defer http.Redirect(w, req, "/landrive", http.StatusMovedPermanently)
 
 		//Fileupload orientiert nach https://www.socketloop.com/tutorials/golang-upload-file
-		file, header, err := req.FormFile("uploadFile")
+		file, _, err := req.FormFile("uploadFile")
 		folderPath := req.FormValue("path")
+		filename := req.FormValue("fileName")
 		log.Println("Path where file is going to be placed: " + folderPath)
 		if err != nil {
 			log.Println(w, err)
@@ -487,7 +488,7 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 
 		defer file.Close()
 
-		filepath := flag.Lookup("F").Value.String() + user.name + "/" + folderPath + "/" + header.Filename
+		filepath := flag.Lookup("F").Value.String() + user.name + "/" + folderPath + "/" + filename
 
 		out, err := os.Create(filepath)
 		if err != nil {
