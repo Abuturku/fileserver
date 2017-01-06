@@ -51,10 +51,17 @@ func StartFileserver() {
 
 }
 
+func setHeaderUncaching(w http.ResponseWriter){
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Cache-control", "no-cache, must-revalidate")
+	w.Header().Set("Expires", "-1")
+
+}
 /*
 Wird aufgerufen wenn ein User die Webseite (Startseite) betritt. Sollte er einen gültigen Cookie besitzen wird er sofort auf die Hauptseite weitergeleitet
 */
 func index(w http.ResponseWriter, req *http.Request) {
+	setHeaderUncaching(w)
 	cookiecheck, _, _ := checkCookie(w, req)
 	if cookiecheck {
 		http.Redirect(w, req, "/landrive", http.StatusMovedPermanently)
@@ -68,6 +75,7 @@ func index(w http.ResponseWriter, req *http.Request) {
 Wird beim Betreten der Hauptseite aufgerufen. Sollte jedoch kein gültiger Cookie vorhanden sein, wird man auf die Startseite weitergeleitet.
 */
 func landrive(w http.ResponseWriter, req *http.Request) {
+	setHeaderUncaching(w)
 	cookiecheck, _, _ := checkCookie(w, req)
 	if cookiecheck {
 		t, err := template.ParseFiles("website/landrive.html")
@@ -91,12 +99,15 @@ func folderStructHandler(w http.ResponseWriter, req *http.Request) {
 	if cookiecheck {
 		log.Println("Loading FolderStruct for user " + user.name)
 		folders := getFolderStruct(user.name)
+		fmt.Printf("%+v\n", folders)
 		js, err := json.Marshal(folders)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
+		setHeaderUncaching(w)
+		log.Println(w.Header())
 		w.Write(js)
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
@@ -107,6 +118,7 @@ func folderStructHandler(w http.ResponseWriter, req *http.Request) {
 Wird genutzt um einen User aus zu loggen und somit den Cookie zu löschen.
 */
 func logoutHandler(w http.ResponseWriter, req *http.Request) {
+	setHeaderUncaching(w)
 	cookiecheck, user, cookie := checkCookie(w, req)
 	if cookiecheck {
 		log.Println("Logout: " + user.name)
@@ -123,6 +135,7 @@ func logoutHandler(w http.ResponseWriter, req *http.Request) {
 Methode wird aufgerufen wenn ein neuer Ordner erstellt werden soll.
 */
 func createFolderHandler(w http.ResponseWriter, req *http.Request) {
+	setHeaderUncaching(w)
 	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
 
@@ -140,6 +153,7 @@ func createFolderHandler(w http.ResponseWriter, req *http.Request) {
 Löscht einen Ordner oder eine Datei der/die anhand des übergebenen Pfades identifiziert wird.
 */
 func deleteHandler(w http.ResponseWriter, req *http.Request) {
+	setHeaderUncaching(w)
 	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
 
@@ -161,6 +175,7 @@ func deleteHandler(w http.ResponseWriter, req *http.Request) {
 Startet den Download der angeforderten Datei
 */
 func downloadHandler(w http.ResponseWriter, req *http.Request) {
+	setHeaderUncaching(w)
 	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
 		path := req.FormValue("path")
@@ -205,6 +220,7 @@ func wgetHandler(w http.ResponseWriter, req *http.Request) {
 Prüft ob ein Cookie gültig ist
 */
 func checkCookie(w http.ResponseWriter, req *http.Request) (bool, user, http.Cookie) {
+	setHeaderUncaching(w)
 	cookies := req.Cookies()
 
 	for _, cookie := range cookies {
@@ -228,6 +244,7 @@ func checkCookie(w http.ResponseWriter, req *http.Request) (bool, user, http.Coo
 Prüft Name und Passwort beim Login und leitet bei erfolgreicher Überprüfung den User weiter
 */
 func loginHandler(w http.ResponseWriter, req *http.Request) {
+	setHeaderUncaching(w)
 
 	username := req.FormValue("username")
 	password := req.FormValue("password")
@@ -246,6 +263,7 @@ func loginHandler(w http.ResponseWriter, req *http.Request) {
 Loggt den User ein, indem ein Cookie für diesen erstellt und gesetzt wird.
 */
 func loginUser(user *user, w http.ResponseWriter, req *http.Request) {
+	setHeaderUncaching(w)
 	cookieValue := hash([]string{user.name, user.password})
 	maxAge, _ := strconv.Atoi(flag.Lookup("T").Value.String())
 	cookie := http.Cookie{Name: user.name, Value: cookieValue, MaxAge: maxAge, Expires: time.Now().Add(15 * time.Minute)}
@@ -259,6 +277,7 @@ func loginUser(user *user, w http.ResponseWriter, req *http.Request) {
 Registriert einen User. Prüft ob beide Passwörter gleich sind und ob es den User noch nicht gibt
 */
 func newUserHandler(w http.ResponseWriter, req *http.Request) {
+	setHeaderUncaching(w)
 	username := req.FormValue("username")
 	password := req.FormValue("password")
 	password2 := req.FormValue("password2")
@@ -451,6 +470,7 @@ func getFolderStruct(path string) Folder {
 Lädt eine Datei die in FormFile und FormValue definiert ist hoch.
 */
 func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
+	setHeaderUncaching(w)
 	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
 		log.Println("Request to upload a file was made from user " + user.name)
@@ -492,6 +512,7 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 Ändert ein Passwort. Überprüft das alte Passwort. Überprüft ob beide neuen Passwörter gleich sind. Wenn ja wird es in der CSV-Datei im Server niedergeschrieben.
 */
 func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
+	setHeaderUncaching(w)
 	cookiecheck, user, cookie := checkCookie(w, req)
 
 	log.Println("Change password request from user " + user.name)
