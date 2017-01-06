@@ -497,11 +497,11 @@ func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
 				loginUser(user, w, req)
 			} else {
 				log.Println("ChangePW: Old PW was not correct")
-				http.Redirect(w, req, "?change=oldPwFalse", http.StatusMovedPermanently)
+				http.Redirect(w, req, "/landrive?change=oldPwFalse", http.StatusMovedPermanently)
 			}
 		} else {
 			log.Println("ChangePW: PW1 is not PW2")
-			http.Redirect(w, req, "?change=pwRepeatFalse", http.StatusMovedPermanently)
+			http.Redirect(w, req, "/landrive?change=pwRepeatFalse", http.StatusMovedPermanently)
 		}
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
