@@ -287,6 +287,7 @@ func createUser(username string, password string) user {
 	salt := generateSalt()
 	hashedPw := hash([]string{password, salt})
 	log.Println("Creating user with parameters: ", username, hashedPw, salt)
+
 	f, err := os.OpenFile(flag.Lookup("L").Value.String(), os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Println(err)
@@ -338,6 +339,16 @@ type user struct {
 Lädt den User aus der CSV Datei, die im Server liegt
 */
 func loadUser(username string) *user {
+
+	if _, err := os.Stat(flag.Lookup("L").Value.String()); os.IsNotExist(err) {
+		_, err := os.Create(flag.Lookup("L").Value.String())
+		if err != nil {
+			log.Println(err)
+		} else {
+			log.Println("Created USER-CSV")
+		}
+	}
+
 	f, _ := os.Open(flag.Lookup("L").Value.String())
 
 	r := csv.NewReader(f)
@@ -383,9 +394,9 @@ Erstellt einen Ordner
 */
 func createFolder(path string) {
 	_, err := os.Stat(flag.Lookup("F").Value.String())
-	 
+
 	if os.IsNotExist(err) {
-		os.Mkdir(flag.Lookup("F").Value.String(),0777)
+		os.Mkdir(flag.Lookup("F").Value.String(), 0777)
 	}
 
 	os.Mkdir(flag.Lookup("F").Value.String()+path, 0777)
