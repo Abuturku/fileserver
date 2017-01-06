@@ -14,7 +14,7 @@ function emptyRegPw(){
 	}
 }
 
-.addEventListener("DOMContentLoaded", function(){
+window.addEventListener("DOMContentLoaded", function(){
 	 /**
 	 * reading parameters that are added to the url by the server
 	 */
