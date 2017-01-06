@@ -283,6 +283,7 @@ func newUserHandler(w http.ResponseWriter, req *http.Request) {
 Fügt einen User der CSV Datei auf dem Server hinzu
 */
 func createUser(username string, password string) user {
+
 	salt := generateSalt()
 	hashedPw := hash([]string{password, salt})
 	log.Println("Creating user with parameters: ", username, hashedPw, salt)
@@ -381,6 +382,12 @@ func hash(strings []string) string {
 Erstellt einen Ordner
 */
 func createFolder(path string) {
+	_, err := os.Stat(flag.Lookup("F").Value.String())
+	 
+	if os.IsNotExist(err) {
+		os.Mkdir(flag.Lookup("F").Value.String(),0777)
+	}
+
 	os.Mkdir(flag.Lookup("F").Value.String()+path, 0777)
 }
 
@@ -404,7 +411,7 @@ type File struct {
 
 /*
 Gibt die untere Ordnerstruktur eines Pfades zurück
- */
+*/
 func getFolderStruct(path string) Folder {
 	index := strings.Index(path, "/")
 	var name string
@@ -534,7 +541,6 @@ type Authenticator interface {
 }
 
 type AuthenticatorFunc func(user *user, password string) bool
-
 
 type AuthenticatorBasic interface {
 	AuthenticateBasic(user, password string) bool
