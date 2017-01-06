@@ -132,7 +132,8 @@ window.onload = function () {
 	var xmlhttp = new XMLHttpRequest();
 	xmlhttp.onreadystatechange = function() {
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-			loadFolderData(JSON.parse(xmlhttp.responseText));
+			var jsonString = JSON.parse(xmlhttp.responseText);
+			loadFolderData(jsonString);
 			generateFolderStructure();
 			folderSelected(document.getElementsByClassName("folderRoot")[0],null);
 		}
