@@ -21,6 +21,15 @@ window.addEventListener("DOMContentLoaded", function(){
 		return result;
 	}
 	
+	function emptyRegPw(){
+		var p1 = document.getElementById("r_password").value;
+		var p2 = document.getElementById("r_password2").value;
+		if(p1 === "" || p2 === ""){
+			alert("A password must have at least 1 character.\nPlease fill both \"password\" fields.");
+			return false;
+		}
+	}
+	
 	window.onload=function validate(){
 		var message = "none";
 		if(getUrlParameter("register")==="userfalse"){

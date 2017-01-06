@@ -66,9 +66,18 @@ function generateFolderStructure(){
 	
 window.onload = function () {
 	//check change pw response
-	if(getUrlParameter("change")==="oldPwFalse"){
-		alert("it works!");		
+	var message = "none";
+	if(getUrlParameter("change")==="pwRepeatFalse"){
+		message = "Password change failed.\nThe new passwords did not match.");		
 	}
+	if(getUrlParameter("change")==="oldPwFalse"){
+		message = "Password change failed.\nPlease enter the correct current password.");		
+	}
+	
+	if(message != "none"){
+		alert(message);
+	}
+	
 	//catch server response
 	var xmlhttp = new XMLHttpRequest();
 	xmlhttp.onreadystatechange = function() {
@@ -388,7 +397,7 @@ function onclickDeleteFile(form){
 		}
 	}
 }
-	
+
 function onFileSelectedForUpload(form){
 	form.submit();
 }
@@ -422,6 +431,15 @@ function cancelPwChange(){
 
 function onclickChangePw(){
 	document.getElementById("pwChngDialog").classList.remove("hidden");
+}
+
+function emptyChangePw(){
+	var p1 = document.getElementById("cpw_np1").value;
+	var p2 = document.getElementById("cpw_np2").value;
+	if(p1 === "" || p2 === ""){
+		alert("A password must have at least 1 character.\nPlease fill both \"New password\" fields.");
+		return false;
+	}
 }
 
 function onclickNewFolder(form){
