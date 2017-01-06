@@ -2,6 +2,15 @@
   * @author Andreas Schick (2792119), Linda Latreider (7743782), Niklas Nikisch (9364290)
   */
 
+function emptyRegPw(){
+	var p1 = document.getElementById("r_password").value;
+	var p2 = document.getElementById("r_password2").value;
+	if(p1 === "" || p2 === ""){
+		alert("A password must have at least 1 character.\nPlease fill both \"password\" fields.");
+		return false;
+	}
+}
+
 window.addEventListener("DOMContentLoaded", function(){
 	//document.getElementById("loginButton").onclick(onClickLoginProcess);
 	//document.getElementById("registerButton").onclick(onClickRegisterProcess);
@@ -19,15 +28,6 @@ window.addEventListener("DOMContentLoaded", function(){
 				}
 		});
 		return result;
-	}
-	
-	function emptyRegPw(){
-		var p1 = document.getElementById("r_password").value;
-		var p2 = document.getElementById("r_password2").value;
-		if(p1 === "" || p2 === ""){
-			alert("A password must have at least 1 character.\nPlease fill both \"password\" fields.");
-			return false;
-		}
 	}
 	
 	window.onload=function validate(){
