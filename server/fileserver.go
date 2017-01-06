@@ -108,6 +108,7 @@ func folderStructHandler(w http.ResponseWriter, req *http.Request) {
 		setHeaderUncaching(w)
 		w.Write(js)
 	} else {
+		log.Println("Cookiecheck in getFolderStruct failed")
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 	}
 }
