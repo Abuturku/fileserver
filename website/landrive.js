@@ -64,14 +64,29 @@ function generateFolderStructure(){
 		return foldersHtmlTemp;
 	}
 	
+	function getUrlParameter(paramName){
+		var result = "-1",
+			tmp = [];
+		location
+			.search.substr(1)
+			.split("&")
+			.forEach(function (item) {
+				tmp = item.split("=");
+				if (tmp[0] === paramName){
+					result = decodeURIComponent(tmp[1]);
+				}
+		});
+		return result;
+	}
+	
 window.onload = function () {
 	//check change pw response
 	var message = "none";
 	if(getUrlParameter("change")==="pwRepeatFalse"){
-		message = "Password change failed.\nThe new passwords did not match.");		
+		message = "Password change failed.\nThe new passwords did not match.";		
 	}
 	if(getUrlParameter("change")==="oldPwFalse"){
-		message = "Password change failed.\nPlease enter the correct current password.");		
+		message = "Password change failed.\nPlease enter the correct current password.";		
 	}
 	
 	if(message != "none"){
