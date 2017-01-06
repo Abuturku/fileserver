@@ -11,15 +11,15 @@ import (
 	"testing"
 	//"log"
 	//"io"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"strconv"
 	"time"
-	"github.com/stretchr/testify/assert"
 
-	"fmt"
 	"bytes"
-	"mime/multipart"
+	"fmt"
 	"io"
+	"mime/multipart"
 )
 
 /*
@@ -31,7 +31,6 @@ func generateCookie() http.Cookie {
 	cookie := http.Cookie{Name: "Andy", Value: cookieValue, MaxAge: maxAge, Expires: time.Now().Add(15 * time.Minute)}
 	return cookie
 }
-
 
 //Siehe Vorlesungsfolien zu BasicAuth
 func doRequestWithPassword(t *testing.T, url string) *http.Response {
@@ -60,24 +59,79 @@ func init() {
 		os.Remove(pathToFile)
 	}
 
-	file, err := os.Create(pathToFile)
-
-	writer := csv.NewWriter(file)
-	defer file.Close()
-
-	writer.Write([]string{"Andy", "a879518e72e3aa6d82126e52d6a641e66005d68b44a31ea5797d0e24f90fd759", "0912951feb016907a1b762c7f83de9b0"})
-	writer.Flush()
-	err = writer.Error()
-	if err != nil {
-
-	}
-
-	os.Mkdir("test", 0777)
-
-	flag.String("L", pathToFile, "Path to file, where usernames, passwords and salts are stored")
+	flag.String("L", "./user_test.csv", "Path to file, where usernames, passwords and salts are stored")
 	flag.String("T", "900", "Session timeout given in seconds")
 	flag.String("F", "test/", "Folder where all Userfiles are stored")
 
+}
+
+// Neue Nutzer sollen selbst einen Zugang anlegen können.
+func TestCreateValidUser(t *testing.T) {
+	req, err := http.NewRequest("POST", "/register", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v := url.Values{}
+	v.Add("username", "Andy")
+	v.Add("password", "andy")
+	v.Add("password2", "andy")
+	req.Form = v
+
+	rr := httptest.NewRecorder()
+
+	newUserHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusFound {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusFound)
+	}
+}
+
+// Neue Nutzer sollen selbst einen Zugang anlegen können. Negativ Test
+func TestCreateUserPwFalse(t *testing.T) {
+	req, err := http.NewRequest("POST", "/register", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v := url.Values{}
+	v.Add("username", "Niklas")
+	v.Add("password", "niklas")
+	v.Add("password2", "niklas1")
+	req.Form = v
+
+	rr := httptest.NewRecorder()
+
+	newUserHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusMovedPermanently {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
+	}
+}
+
+// Neue Nutzer sollen selbst einen Zugang anlegen können. Negativ Test
+func TestCreateUserNameFalse(t *testing.T) {
+	req, err := http.NewRequest("POST", "/register", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v := url.Values{}
+	v.Add("username", "Andy")
+	v.Add("password", "niklas")
+	v.Add("password2", "niklas")
+	req.Form = v
+
+	rr := httptest.NewRecorder()
+
+	newUserHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusMovedPermanently {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
+	}
 }
 
 //Der Zugang soll durch Benutzernamen und Passwort geschützt werden. Positives Beispiel
@@ -146,6 +200,22 @@ func TestAccessUserDoesntExist(t *testing.T) {
 
 //Zur weiteren Identifikation des Nutzers soll ein Session-ID Cookie verwendet werden.
 func TestValidCookie(t *testing.T) {
+	pathToFile := flag.Lookup("L").Value.String()
+	if _, err := os.Stat(pathToFile); err == nil {
+		os.Remove(pathToFile)
+	}
+	file, err := os.Create(pathToFile)
+
+	writer := csv.NewWriter(file)
+	defer file.Close()
+
+	writer.Write([]string{"Andy", "a879518e72e3aa6d82126e52d6a641e66005d68b44a31ea5797d0e24f90fd759", "0912951feb016907a1b762c7f83de9b0"})
+	writer.Flush()
+	err = writer.Error()
+	if err != nil {
+
+	}
+
 	req, err := http.NewRequest("POST", "/login", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -200,80 +270,11 @@ func TestUnvalidCookie(t *testing.T) {
 	}
 }
 
-// Neue Nutzer sollen selbst einen Zugang anlegen können.
-func TestCreateValidUser(t *testing.T) {
-	req, err := http.NewRequest("POST", "/register", nil)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	v := url.Values{}
-	v.Add("username", "Niklas")
-	v.Add("password", "niklas")
-	v.Add("password2", "niklas")
-	req.Form = v
-
-	rr := httptest.NewRecorder()
-
-	newUserHandler(rr, req)
-
-	if status := rr.Code; status != http.StatusFound {
-		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusFound)
-	}
-}
-
-// Neue Nutzer sollen selbst einen Zugang anlegen können. Negativ Test
-func TestCreateUserPwFalse(t *testing.T) {
-	req, err := http.NewRequest("POST", "/register", nil)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	v := url.Values{}
-	v.Add("username", "Niklas")
-	v.Add("password", "niklas")
-	v.Add("password2", "niklas1")
-	req.Form = v
-
-	rr := httptest.NewRecorder()
-
-	newUserHandler(rr, req)
-
-	if status := rr.Code; status != http.StatusMovedPermanently {
-		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
-	}
-}
-
-// Neue Nutzer sollen selbst einen Zugang anlegen können. Negativ Test
-func TestCreateUserNameFalse(t *testing.T) {
-	req, err := http.NewRequest("POST", "/register", nil)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	v := url.Values{}
-	v.Add("username", "Andy")
-	v.Add("password", "niklas")
-	v.Add("password2", "niklas")
-	req.Form = v
-
-	rr := httptest.NewRecorder()
-
-	newUserHandler(rr, req)
-
-	if status := rr.Code; status != http.StatusMovedPermanently {
-		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
-	}
-}
-
 // Es soll möglich sein, Dateien ”hochzuladen“
-func TestSaveFile(t *testing.T){
+func TestSaveFile(t *testing.T) {
 	var b bytes.Buffer
 	w := multipart.NewWriter(&b)
-	f, err := os.Open("./user_test.csv")
+	f, err := os.Open(flag.Lookup("L").Value.String())
 
 	if err != nil {
 		return
@@ -304,7 +305,7 @@ func TestSaveFile(t *testing.T){
 	w.Close()
 
 	rr := httptest.NewRecorder()
-	_,_,err = req.FormFile("uploadFile")
+	_, _, err = req.FormFile("uploadFile")
 
 	if err != nil {
 		t.Log(err)
@@ -497,7 +498,6 @@ func TestCreateFolderNotLoggedIn(t *testing.T) {
 		t.Fatal(err)
 	}
 
-
 	rr := httptest.NewRecorder()
 
 	createFolderHandler(rr, req)
@@ -573,7 +573,7 @@ func TestDeleteFolderPathEmpty(t *testing.T) {
 }
 
 //Startseite Testen ob weiterleitung funktioniert
-func TestIndexHandlerLoggedIn(t *testing.T){
+func TestIndexHandlerLoggedIn(t *testing.T) {
 	req, err := http.NewRequest("GET", "/", nil)
 
 	if err != nil {
@@ -592,7 +592,7 @@ func TestIndexHandlerLoggedIn(t *testing.T){
 }
 
 //Prüft Ordnerstrunkturrückgabe
-func TestFolderStructHandlerLoggedIn(t *testing.T){
+func TestFolderStructHandlerLoggedIn(t *testing.T) {
 	req, err := http.NewRequest("GET", "/getFolderStruct", nil)
 
 	if err != nil {
@@ -609,8 +609,9 @@ func TestFolderStructHandlerLoggedIn(t *testing.T){
 		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 }
+
 //Prüft Ordnerstrunkturrückgabe. Negativ Test (Nicht eingelogged)
-func TestFolderStructHandlerNotLoggedIn(t *testing.T){
+func TestFolderStructHandlerNotLoggedIn(t *testing.T) {
 	req, err := http.NewRequest("GET", "/getFolderStruct", nil)
 
 	if err != nil {
@@ -626,7 +627,7 @@ func TestFolderStructHandlerNotLoggedIn(t *testing.T){
 }
 
 //Prüft das ausloggen
-func TestLogoutHandlerLoggedIn(t *testing.T){
+func TestLogoutHandlerLoggedIn(t *testing.T) {
 	req, err := http.NewRequest("GET", "/logout", nil)
 
 	if err != nil {
@@ -645,7 +646,7 @@ func TestLogoutHandlerLoggedIn(t *testing.T){
 }
 
 //Prüft das Ausloggen. Negativ Test (Nicht eingelogged)
-func TestLogoutHandlerNotLoggedIn(t *testing.T){
+func TestLogoutHandlerNotLoggedIn(t *testing.T) {
 	req, err := http.NewRequest("GET", "/logout", nil)
 
 	if err != nil {
@@ -739,7 +740,7 @@ func TestChangePasswordValid(t *testing.T) {
 }
 
 //Prüft weiterleitung der Hauptseite
-func TestLandriveHandlerLoggedIn(t *testing.T){
+func TestLandriveHandlerLoggedIn(t *testing.T) {
 	req, err := http.NewRequest("GET", "/landrive", nil)
 
 	if err != nil {
@@ -754,5 +755,16 @@ func TestLandriveHandlerLoggedIn(t *testing.T){
 
 	if status := rr.Code; status != http.StatusMovedPermanently {
 		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
+	}
+	teardown()
+}
+
+//Methode die den Test aufräumt
+func teardown() {
+	if _, err := os.Stat(flag.Lookup("F").Value.String()); err == nil {
+		os.RemoveAll(flag.Lookup("F").Value.String())
+	}
+	if _, err := os.Stat(flag.Lookup("L").Value.String()); err == nil {
+		os.Remove(flag.Lookup("L").Value.String())
 	}
 }
