@@ -99,7 +99,6 @@ func folderStructHandler(w http.ResponseWriter, req *http.Request) {
 	if cookiecheck {
 		log.Println("Loading FolderStruct for user " + user.name)
 		folders := getFolderStruct(user.name)
-		fmt.Printf("%+v\n", folders)
 		js, err := json.Marshal(folders)
 		if err != nil {
 			fmt.Println(err)
@@ -107,7 +106,6 @@ func folderStructHandler(w http.ResponseWriter, req *http.Request) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		setHeaderUncaching(w)
-		log.Println(w.Header())
 		w.Write(js)
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)
