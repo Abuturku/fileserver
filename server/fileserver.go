@@ -489,8 +489,8 @@ func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
 		oldPW := req.FormValue("oldPassword")
 		newPW := req.FormValue("newPassword")
 		newPWToo := req.FormValue("newPassword2")
-		if newPW == newPWToo {
-			if AuthenticatorVar.Authenticate(&user, oldPW) {
+		if AuthenticatorVar.Authenticate(&user, oldPW) {
+			if newPW == newPWToo {
 				changePasswordInFile(&user, newPW)
 				log.Println("Set newPW in Cookie: " + user.name)
 				cookie.Expires = time.Now().Add(-1)
@@ -500,12 +500,12 @@ func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
 				user := loadUser(user.name)
 				loginUser(user, w, req)
 			} else {
-				log.Println("ChangePW: Old PW was not correct")
-				http.Redirect(w, req, "/landrive?change=oldPwFalse", http.StatusMovedPermanently)
+				log.Println("ChangePW: PW1 is not PW2")
+				http.Redirect(w, req, "/landrive?change=pwRepeatFalse", http.StatusMovedPermanently)
 			}
 		} else {
-			log.Println("ChangePW: PW1 is not PW2")
-			http.Redirect(w, req, "/landrive?change=pwRepeatFalse", http.StatusMovedPermanently)
+			log.Println("ChangePW: Old PW was not correct")
+			http.Redirect(w, req, "/landrive?change=oldPwFalse", http.StatusMovedPermanently)
 		}
 	} else {
 		http.Redirect(w, req, "/", http.StatusMovedPermanently)

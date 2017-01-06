@@ -13,11 +13,13 @@ import (
 	//"io"
 	"io/ioutil"
 	"strconv"
-	"strings"
 	"time"
 	"github.com/stretchr/testify/assert"
 
 	"fmt"
+	"bytes"
+	"mime/multipart"
+	"io"
 )
 
 /*
@@ -267,46 +269,53 @@ func TestCreateUserNameFalse(t *testing.T) {
 	}
 }
 
-
-// An https://golang.org/src/net/http/request_test.go orientiert
-const testMessage =  `
- --MyBoundary
- Content-Disposition: form-data; name="uploadFile"; filename="filea.txt"
- Content-Type: text/plain
- This is a test file.
- --MyBoundary
- Content-Disposition: form-data; name="text"
- foo
- --MyBoundary--`
-
 // Es soll möglich sein, Dateien ”hochzuladen“
 func TestSaveFile(t *testing.T){
-	postData := strings.NewReader(strings.Replace(testMessage, "\n", "\r\n", -1))
-
-	req, err := http.NewRequest("POST", "/uploadFile", postData)
+	var b bytes.Buffer
+	w := multipart.NewWriter(&b)
+	f, err := os.Open("./user_test.csv")
 
 	if err != nil {
+		return
+	}
 
+	defer f.Close()
+
+	fw, err := w.CreateFormFile("uploadFile", f.Name())
+
+	if err != nil {
+		return
+	}
+	if _, err = io.Copy(fw, f); err != nil {
+		return
+	}
+
+	req, err := http.NewRequest("POST", "/uploadFile", &b)
+
+	if err != nil {
 		t.Fatal("NewRequest:", err)
-
 	}
 
 	cookie := generateCookie()
 	req.AddCookie(&cookie)
 	req.PostForm = url.Values{}
 	req.PostForm.Add("path", "")
-	req.Header.Set("Content-type", `multipart/form-data; boundary="MyBoundary"`)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	w.Close()
 
 	rr := httptest.NewRecorder()
-	_,_,c := req.FormFile("uploadFile")
+	_,_,err = req.FormFile("uploadFile")
 
-	t.Log(c)
+	if err != nil {
+		t.Log(err)
+	}
 
 	uploadFileHandler(rr, req)
 
-	if _, err := os.Stat(flag.Lookup("F").Value.String() + cookie.Name +"/filea.txt"); os.IsNotExist(err) {
+	if _, err := os.Stat(flag.Lookup("F").Value.String() + cookie.Name + "/" + f.Name()); os.IsNotExist(err) {
 		t.Error("Error while saving")
 	}
+
 }
 
 // Es soll möglich sein, Dateien ”herunterzuladen“
