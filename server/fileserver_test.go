@@ -17,6 +17,7 @@ import (
 	"time"
 	"github.com/stretchr/testify/assert"
 
+	"fmt"
 )
 
 /*
@@ -27,6 +28,25 @@ func generateCookie() http.Cookie {
 	maxAge, _ := strconv.Atoi(flag.Lookup("T").Value.String())
 	cookie := http.Cookie{Name: "Andy", Value: cookieValue, MaxAge: maxAge, Expires: time.Now().Add(15 * time.Minute)}
 	return cookie
+}
+
+
+//Siehe Vorlesungsfolien zu BasicAuth
+func doRequestWithPassword(t *testing.T, url string) *http.Response {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url, nil)
+	assert.NoError(t, err)
+	req.SetBasicAuth("Andy", "1234")
+	res, err := client.Do(req)
+	assert.NoError(t, err)
+	return res
+}
+
+//Siehe Vorlesungsfolien zu BasicAuth
+func createServer(auth AuthenticatorFuncBasic) *httptest.Server {
+	return httptest.NewServer(WrapperBasic(auth, func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "Hello client")
+	}))
 }
 
 /*

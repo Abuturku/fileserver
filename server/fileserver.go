@@ -9,17 +9,14 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"html/template"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/http/httptest"
 	"os"
 	"strconv"
 	"strings"
-	"testing"
 	"time"
 )
 
@@ -531,25 +528,6 @@ func changePasswordInFile(user *user, newPassword string) {
 	}
 	createUser(user.name, newPassword)
 }
-
-//Siehe Vorlesungsfolien zu BasicAuth
-func doRequestWithPassword(t *testing.T, url string) *http.Response {
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", url, nil)
-	assert.NoError(t, err)
-	req.SetBasicAuth("Andy", "1234")
-	res, err := client.Do(req)
-	assert.NoError(t, err)
-	return res
-}
-
-//Siehe Vorlesungsfolien zu BasicAuth
-func createServer(auth AuthenticatorFuncBasic) *httptest.Server {
-	return httptest.NewServer(WrapperBasic(auth, func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Hello client")
-	}))
-}
-
 
 type Authenticator interface {
 	Authenticate(user *user, password string) bool
