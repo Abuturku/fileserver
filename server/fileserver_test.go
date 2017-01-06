@@ -651,6 +651,57 @@ func TestLogoutHandlerNotLoggedIn(t *testing.T){
 	}
 }
 
+// Ein Nutzer soll sein Passwort ändern können.
+func TestChangePasswordDifferentPasswords(t *testing.T) {
+	req, err := http.NewRequest("POST", "/changePw", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v := url.Values{}
+	v.Add("oldPassword", "andy")
+	v.Add("newPassword", "niklas1")
+	v.Add("newPassword2", "niklas")
+	req.Form = v
+
+	cookie := generateCookie()
+	req.AddCookie(&cookie)
+
+	rr := httptest.NewRecorder()
+
+	changePasswordHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusMovedPermanently {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
+	}
+}
+
+// Ein Nutzer soll sein Passwort ändern können.
+func TestChangePasswordWrongOldPassword(t *testing.T) {
+	req, err := http.NewRequest("POST", "/changePw", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v := url.Values{}
+	v.Add("oldPassword", "andy1")
+	v.Add("newPassword", "niklas")
+	v.Add("newPassword2", "niklas")
+	req.Form = v
+
+	cookie := generateCookie()
+	req.AddCookie(&cookie)
+
+	rr := httptest.NewRecorder()
+
+	changePasswordHandler(rr, req)
+
+	if status := rr.Code; status != http.StatusMovedPermanently {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
+	}
+}
 
 // Ein Nutzer soll sein Passwort ändern können.
 func TestChangePasswordValid(t *testing.T) {
@@ -677,6 +728,7 @@ func TestChangePasswordValid(t *testing.T) {
 		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusFound)
 	}
 }
+
 //Prüft weiterleitung der Hauptseite
 func TestLandriveHandlerLoggedIn(t *testing.T){
 	req, err := http.NewRequest("GET", "/landrive", nil)
