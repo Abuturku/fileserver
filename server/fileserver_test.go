@@ -54,7 +54,7 @@ func createServer(auth AuthenticatorFuncBasic) *httptest.Server {
 Initialisiert den Test mit allen Testdatein die nötig sind
 */
 func init() {
-	pathToFile := "./user_test.csv"
+	pathToFile := "user_test.csv"
 	if _, err := os.Stat(pathToFile); err == nil {
 		os.Remove(pathToFile)
 	}
@@ -306,6 +306,7 @@ func TestSaveFile(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 	_, _, err = req.FormFile("uploadFile")
+	req.Form.Add("fileName", flag.Lookup("L").Value.String())
 
 	if err != nil {
 		t.Log(err)
@@ -314,7 +315,7 @@ func TestSaveFile(t *testing.T) {
 	uploadFileHandler(rr, req)
 
 	if _, err := os.Stat(flag.Lookup("F").Value.String() + cookie.Name + "/" + f.Name()); os.IsNotExist(err) {
-		t.Error("Error while saving")
+		t.Error(err)
 	}
 
 }
@@ -756,15 +757,16 @@ func TestLandriveHandlerLoggedIn(t *testing.T) {
 	if status := rr.Code; status != http.StatusMovedPermanently {
 		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusMovedPermanently)
 	}
-	teardown()
+	teardown(t)
 }
 
 //Methode die den Test aufräumt
-func teardown() {
+func teardown(t *testing.T) {
 	if _, err := os.Stat(flag.Lookup("F").Value.String()); err == nil {
 		os.RemoveAll(flag.Lookup("F").Value.String())
 	}
 	if _, err := os.Stat(flag.Lookup("L").Value.String()); err == nil {
 		os.Remove(flag.Lookup("L").Value.String())
+
 	}
 }
