@@ -1,7 +1,10 @@
 /**
   * authors: Andreas Schick (2792119), Linda Latreider (7743782), Niklas Nikisch (9364290)
   */
-
+  
+/***
+ * basic settings for both index.html and landrive.html
+ */
 body{
 	background-color: aliceblue;
 	font: 0.75em/2em arial,geneva,helvetica,center,sans-serif; 
@@ -34,7 +37,9 @@ label{
 input{
 	padding: 0.3rem;
 }
-/****** index.html specific ******/
+/***
+ * index.html specific 
+ */
 h3.start{
 	margin: 0;
     padding-top: 0.5rem;
@@ -69,14 +74,19 @@ h3.start{
 	max-width:39.7rem;
 }
 
-/****** landrive.html specific ******/
+/***
+ * landrive.html specific 
+ */
 .inline_button{
 display:inline-block;
 }
 #landrive{
 	background-color:#gainsboro;
 }
-/**page structure**/
+
+/**
+ * page structure
+ */
 #page{
 	width:100%;
 	height:100%;
@@ -104,7 +114,10 @@ display:inline-block;
 #filesField{
 	padding: 1rem;
 }
-/**folder controls**/
+
+/**
+ * folder controls
+ */
 .icon_button{
 	height:64px;
 	width:64px;
@@ -132,7 +145,10 @@ display:inline-block;
 .icon_logout{
 	background-image:url("icon_lgo.png");
 }
-/**folder structure**/
+
+/**
+ * folder structure
+ */
 #folderControls{
 	margin-bottom:1rem;
 }
@@ -163,7 +179,10 @@ div.folderRoot, div.folderChild{
 #selectedFolder{
 	background-color: #D1EBFF;
 }
-/**file controls**/
+
+/**
+ * file controls
+ */
 form.inline_button{
 	margin-bottom:0;
 }
@@ -224,7 +243,9 @@ input.icon_upload{
 	background-color: #D1EBFF;
 }
 
-/**files**/
+/**
+ * files
+ */
 .file{
 	display:inline-block;
 	width:8rem;
@@ -252,7 +273,9 @@ input.icon_upload{
 	background-color: #D1EBFF;
 }
 
-/**dialog window for pw change**/
+/**
+ * dialog window for pw change
+ */
 #pwChngDialog {
 	position:absolute;
 	width:97%;

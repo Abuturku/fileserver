@@ -2,6 +2,9 @@
   * @author Andreas Schick (2792119), Linda Latreider (7743782), Niklas Nikisch (9364290)
   */
 
+  /**
+  * declaration of variables
+  */
 var depthOfFoldersUnderRoot = 0;
 var username = "User";
 
@@ -12,74 +15,100 @@ var folderBacklog = [];
 var currentFolder;
 var folderForwlog = [];
 
-//initialize data of the folders, user, files
-function loadFolderData(data){
+ /**
+ * initialize data of the user, folders and files
+ */
+ function loadFolderData(data){
 	folderData = data;
 	username = folderData.Name;
 }
 
+ /**
+ * changing class of the respective button with the ID "sId"
+ * - change accessibility to false
+ * - change appearance
+ */
 function deactivateButton(sId){
 	//make sure that the class won't be duplicated
 	document.getElementsByClassName(sId)[0].classList.remove("inactive_icon");
 	document.getElementsByClassName(sId)[0].classList.add("inactive_icon"); 
-
 }
 
+ /**
+ * changing class of the respective button with the ID "sId"
+ * - change accessibility to false
+ * - change appearance
+ */
 function activateButton(sId){
 	document.getElementsByClassName(sId)[0].classList.remove("inactive_icon");
 }
 
+ /**
+ * generating html structure of the nested folders beneath the root folder
+ */
 function generateFolderStructure(){
-		//show root folder
-		var rootHtml = '<div class="folderRoot" onclick="onclickFolderSelected(this, event)"><span id="homeTitle">Home of ';
-			rootHtml += username + '</span></div>';
-		document.getElementById("folderStructure").innerHTML = rootHtml;
-		//show deep structure via recursion
-		var foldersHtml = readFolderStructureRec(folderData.Folders, 1);
-		document.getElementById("folderStructure").innerHTML += foldersHtml;
-	}
+	//show root folder
+	var rootHtml = '<div class="folderRoot" onclick="onclickFolderSelected(this, event)"><span id="homeTitle">Home of ';
+		rootHtml += username + '</span></div>';
+	document.getElementById("folderStructure").innerHTML = rootHtml;
+	//show deep structure via recursion
+	var foldersHtml = readFolderStructureRec(folderData.Folders, 1);
+	document.getElementById("folderStructure").innerHTML += foldersHtml;
+}
 
-	function readFolderStructureRec(childFolders, depth){
-		//exit condition 
-		if (childFolders.length === 0){
-			return "";
+ /**
+ * uses recursion to transform JSON structure information to html
+ * - update depthOfFoldersUnderRoot variable for correct manipulation of the "selected" id
+ */
+function readFolderStructureRec(childFolders, depth){
+	//exit condition: no children left
+	if (childFolders.length === 0){
+		return "";
+	}
+	var foldersHtmlTemp = "";
+	//recursive calls
+	for (var i = 0; i < childFolders.length; i++){
+		//generate new folder 
+		foldersHtmlTemp += '<div class="folderChild" onclick="onclickFolderSelected(this, event)"><span>';
+		var currentName = childFolders[i].Name;
+		//only show text after the last '/'
+		var nameParts = currentName.split("/");
+		foldersHtmlTemp += nameParts.pop() + '</span>';
+		
+		//test if depth is new maximum
+		if (depth > depthOfFoldersUnderRoot){
+			depthOfFoldersUnderRoot = depth;
 		}
-		var foldersHtmlTemp = "";
-		//recursive calls
-		for (var i = 0; i < childFolders.length; i++){
-			//generate new folder 
-			foldersHtmlTemp += '<div class="folderChild" onclick="onclickFolderSelected(this, event)"><span>';
-			var currentName = childFolders[i].Name;
-			//only show text after the last '/'
-			var nameParts = currentName.split("/");
-			foldersHtmlTemp += nameParts.pop() + '</span>';
-			
-			//test if depth is new maximum
-			if (depth > depthOfFoldersUnderRoot){
-				depthOfFoldersUnderRoot = depth;
+		foldersHtmlTemp += readFolderStructureRec(childFolders[i].Folders, depth+1);
+		foldersHtmlTemp += '</div>';
+	}
+	return foldersHtmlTemp;
+}
+
+ /**
+ * reading parameters that are added to the url by the server
+ */
+function getUrlParameter(paramName){
+	var result = "-1",
+		tmp = [];
+	location
+		.search.substr(1)
+		.split("&")
+		.forEach(function (item) {
+			tmp = item.split("=");
+			if (tmp[0] === paramName){
+				result = decodeURIComponent(tmp[1]);
 			}
-			foldersHtmlTemp += readFolderStructureRec(childFolders[i].Folders, depth+1);
-			foldersHtmlTemp += '</div>';
-		}
-		return foldersHtmlTemp;
-	}
-	
-	function getUrlParameter(paramName){
-		var result = "-1",
-			tmp = [];
-		location
-			.search.substr(1)
-			.split("&")
-			.forEach(function (item) {
-				tmp = item.split("=");
-				if (tmp[0] === paramName){
-					result = decodeURIComponent(tmp[1]);
-				}
-		});
-		return result;
-	}
-	
+	});
+	return result;
+}
+
 window.onload = function () {
+	 /**
+	 * if the change password dialogue failed, the server adds a parameter to the url.
+	 * -> the respective problem can be evaluated, so that an error message can be displayed
+	 * if there is no issue / if the window is loaded without the former execution of the change password dialogue, nothing happens.
+	 */
 	//check change pw response
 	var message = "none";
 	if(getUrlParameter("change")==="pwRepeatFalse"){
@@ -93,6 +122,12 @@ window.onload = function () {
 		alert(message);
 	}
 	
+	 /**
+	 * when the page loads, the server sends a JSON string with the complete structure that contains information about:
+	 * - username of the currently logged in user
+	 * - nested folder structure
+	 * - files that each folder contains
+	 */
 	//catch server response
 	var xmlhttp = new XMLHttpRequest();
 	xmlhttp.onreadystatechange = function() {
@@ -103,28 +138,18 @@ window.onload = function () {
 		}
 	}
 
+	 /**
+	 * define XMLHttpRequest + send
+	 */
 	xmlhttp.open("GET", "/getFolderStruct", true);
 	xmlhttp.send();
 }
 
-/**backup
-function searchCurrentFolderObjectRec(childFolders){
-	var folderObj;
-	for (var i = 0; i < childFolders.length; i++){
-		var nameParts = childFolders[i].Name.split("/");
-		var nameOfCurrFolder = nameParts.pop();
-		if (nameOfCurrFolder === document.getElementById("selectedFolder").children[0].innerHTML){
-			return childFolders[i];
-		} else {
-			var currTest = searchCurrentFolderObjectRec(childFolders[i].Folders);
-			if(currTest != undefined){
-				folderObj = currTest;
-			}
-		}
-	}
-	return folderObj;
-}*/
-
+ /**
+ * search the folder and its children
+ * - use the currentFolderPath variable to find it
+ * - return JSON object of the folder and its children
+ */
 function searchCurrentFolderObjectRec(childFolders){
 	var folderObj;
 	for (var i = 0; i < childFolders.length; i++){
@@ -140,6 +165,10 @@ function searchCurrentFolderObjectRec(childFolders){
 	return folderObj;
 }
 
+ /**
+ * if the current folder is the root folder, return complete structure data
+ * else: use recursive search
+ */
 function getCurrentFolderObject(){
 	if(document.getElementById("selectedFolder").children[0].innerHTML === "Home of "+folderData.Name){
 		return folderData;
@@ -147,6 +176,9 @@ function getCurrentFolderObject(){
 	return searchCurrentFolderObjectRec(folderData.Folders);
 }
 
+ /**
+ * use the filesize value of the file to create the attribute on the website with the right unit for better readability
+ */
 function formatFileSize(fileSizeByte){
 	var intResult = fileSizeByte;
 	var temp;
@@ -177,6 +209,9 @@ function formatFileSize(fileSizeByte){
 	return "" + intResult + " TB";
 }
 
+ /**
+ * generating html structure of the files inside the selected folder
+ */
 function loadFiles(){
 	var fileSpace = document.getElementById("availableFiles");
 	var sContent = "";
@@ -201,6 +236,9 @@ function loadFiles(){
 	fileSpace.innerHTML = sContent;
 }
 
+ /**
+ * calculate the path of the selected folder and save it in a global variable
+ */
 function refreshCurrentFolderPath(){
 	var rootName = document.getElementsByClassName("folderRoot")[0].children[0].innerHTML;
 	var pathName;
@@ -230,6 +268,12 @@ function refreshCurrentFolderPath(){
 	currentFolderPath = sPath;
 }
 
+ /**
+ * set the value of the hidden "selected folder" input fields inside the forms of the buttons
+ *  in order to pass the information with the http requests
+ * uses the global variable currentFolderPath
+ * empties the selected file path-fields because no file is selected when a folder gets selected
+ */
 function refreshHiddenInputFieldsFolders(){
 	var inputFields = document.getElementsByClassName("folderPath");
 	for (var i = 0; i < inputFields.length; i++){
@@ -242,6 +286,10 @@ function refreshHiddenInputFieldsFolders(){
 	}
 }
 
+ /**
+ * handles all the necessary actions that need to be taken if a folder gets selected
+ * shared functions that need to happen if a folder gets selected, no matter if it is via click or navigation buttons
+ */
 function folderSelected(elem,event){
 	var folderName = elem.children[0].innerHTML;
 	
@@ -264,6 +312,9 @@ function folderSelected(elem,event){
 	loadFiles();
 }
 
+ /**
+ * handle all actions that need to be taken if a folder is selected via click
+ */
 function onclickFolderSelected(elem, event){
 	//back navigation
 	activateButton("icon_back"); 
@@ -293,6 +344,9 @@ function onclickFolderSelected(elem, event){
 }
 
 
+ /**
+ * remove all IDs of the folders to delete the "selected" attribute
+ */
 //recursive function to remove marking of past selected folders
 function removeFolderIds(divs, remainingFuncCalls){
 	if(remainingFuncCalls<=0){
@@ -316,6 +370,9 @@ function removeFolderIds(divs, remainingFuncCalls){
 	}
 }
 
+ /**
+ * handle click on the navigate back icon
+ */
 function onclickNavigateBack(){
 	//if backlog not empty
 	if(folderBacklog.length > 0){
@@ -336,6 +393,9 @@ function onclickNavigateBack(){
 	}
 }
 
+ /**
+ * handle click on the navigate forward icon
+ */
 function onclickNavigateForward(){
 	if(folderForwlog.length > 0){
 		//check if forwlog will be empty afterwards
@@ -353,6 +413,11 @@ function onclickNavigateForward(){
 	}
 }
 
+ /**
+ * handle all actions that need to be taken if a file is selected
+ * set the value of the hidden "selected file" input fields inside the forms of the buttons
+ *  in order to pass the information with the http requests
+ */
 function onclickFileSelected(elem){
 	var fileName = elem.children[0].innerHTML;
 	
@@ -376,6 +441,9 @@ function onclickFileSelected(elem){
 	}
 }
 
+ /**
+ * handle downloading of a file
+ */
 function onclickDownloadFile(form){
 	var buttonClasses = form.children[0].getAttribute("class").split(" ");
 	var isInactive = false;
@@ -390,6 +458,9 @@ function onclickDownloadFile(form){
 	}
 }
 
+ /**
+ * handle deletion of a file with a prompt-dialogue
+ */
 function onclickDeleteFile(form){
 	var buttonClasses = form.children[0].getAttribute("class").split(" ");
 	var isInactive = false;
@@ -413,10 +484,16 @@ function onclickDeleteFile(form){
 	}
 }
 
+ /**
+ * upload a file after it has been selected
+ */
 function onFileSelectedForUpload(form){
 	form.submit();
 }
 
+ /**
+ * handle deletion of a folder with a prompt-dialogue
+ */
 function onclickDeleteFolder(form){
 	var buttonClasses = form.children[0].getAttribute("class").split(" ");
 	var isInactive = false;
@@ -436,6 +513,9 @@ function onclickDeleteFolder(form){
 	}
 }
 
+ /**
+ * cancel the change password dialogue and reset the visibility of the change-password-area
+ */
 function cancelPwChange(){
 	var cpw_fields = document.getElementsByClassName("cpw_input");
 	for (var i = 0; i<cpw_fields; i++){
@@ -444,10 +524,16 @@ function cancelPwChange(){
 	document.getElementById("pwChngDialog").classList.add("hidden");
 }
 
+ /**
+ * when a http request to the server is sent, make the change-password-area hidden again
+ */
 function onclickChangePw(){
 	document.getElementById("pwChngDialog").classList.remove("hidden");
 }
 
+ /**
+ * handle error message if a user tries to change his/her password to an empty string
+ */
 function emptyChangePw(){
 	var p1 = document.getElementById("cpw_np1").value;
 	var p2 = document.getElementById("cpw_np2").value;
@@ -457,6 +543,9 @@ function emptyChangePw(){
 	}
 }
 
+ /**
+ * handle creation of a new folder with the help of a prompt
+ */
 function onclickNewFolder(form){
 	var newFolderName = prompt("Name of the new Folder:", "Example Folder");
 	if(newFolderName!= null){

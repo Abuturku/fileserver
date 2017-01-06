@@ -2,6 +2,9 @@
   * @author Andreas Schick (2792119), Linda Latreider (7743782), Niklas Nikisch (9364290)
   */
 
+ /**
+ * handle error message if a user tries to set her/his password to an empty string
+ */
 function emptyRegPw(){
 	var p1 = document.getElementById("r_password").value;
 	var p2 = document.getElementById("r_password2").value;
@@ -11,10 +14,10 @@ function emptyRegPw(){
 	}
 }
 
-window.addEventListener("DOMContentLoaded", function(){
-	//document.getElementById("loginButton").onclick(onClickLoginProcess);
-	//document.getElementById("registerButton").onclick(onClickRegisterProcess);
-
+.addEventListener("DOMContentLoaded", function(){
+	 /**
+	 * reading parameters that are added to the url by the server
+	 */
 	function getUrlParameter(paramName){
 		var result = "-1",
 			tmp = [];
@@ -30,7 +33,12 @@ window.addEventListener("DOMContentLoaded", function(){
 		return result;
 	}
 	
-	window.onload=function validate(){
+	 /**
+	 * if the registration or the login attempt failed, the server adds a parameter to the url.
+	 * -> the respective problem can be evaluated, so that an error message can be displayed
+	 * if there is no problem, the server redirects the user to the landrive.html page.
+	 */
+	window.onload = function validate(){
 		var message = "none";
 		if(getUrlParameter("register")==="userfalse"){
 			var message="Registration failed. Username already in use.";
@@ -53,7 +61,6 @@ window.addEventListener("DOMContentLoaded", function(){
 			messagefield.innerHTML = message;
 		} else {
 			messagefield.style.display='none';
-			//document.getElementById("errormessage").setActive(false);
 		}
 	}
 })
