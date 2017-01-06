@@ -86,7 +86,7 @@ window.onload = function () {
 		message = "Password change failed.\nThe new passwords did not match.";		
 	}
 	if(getUrlParameter("change")==="oldPwFalse"){
-		message = "Password change failed.\nPlease enter the correct current password.");		
+		message = "Password change failed.\nPlease enter the correct current password.";		
 	}
 	
 	if(message != "none"){
