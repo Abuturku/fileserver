@@ -18,6 +18,9 @@ import (
 
 )
 
+/*
+Generiert einen Cookie zum Testen
+*/
 func generateCookie() http.Cookie {
 	cookieValue := hash([]string{"Andy", "a879518e72e3aa6d82126e52d6a641e66005d68b44a31ea5797d0e24f90fd759"})
 	maxAge, _ := strconv.Atoi(flag.Lookup("T").Value.String())
@@ -25,6 +28,9 @@ func generateCookie() http.Cookie {
 	return cookie
 }
 
+/*
+Initialisiert den Test mit allen Testdatein die nötig sind
+*/
 func init() {
 	pathToFile := "./user_test.csv"
 	if _, err := os.Stat(pathToFile); err == nil {
@@ -143,6 +149,7 @@ func TestValidCookie(t *testing.T) {
 
 }
 
+//Zur weiteren Identifikation des Nutzers soll ein Session-ID Cookie verwendet werden. Negativ Test
 func TestUnvalidCookie(t *testing.T) {
 	req, err := http.NewRequest("POST", "/login", nil)
 	if err != nil {
@@ -193,6 +200,7 @@ func TestCreateValidUser(t *testing.T) {
 	}
 }
 
+// Neue Nutzer sollen selbst einen Zugang anlegen können. Negativ Test
 func TestCreateUserPwFalse(t *testing.T) {
 	req, err := http.NewRequest("POST", "/register", nil)
 
@@ -215,6 +223,7 @@ func TestCreateUserPwFalse(t *testing.T) {
 	}
 }
 
+// Neue Nutzer sollen selbst einen Zugang anlegen können. Negativ Test
 func TestCreateUserNameFalse(t *testing.T) {
 	req, err := http.NewRequest("POST", "/register", nil)
 
@@ -303,6 +312,7 @@ func TestDownloadFile(t *testing.T) {
 	}
 }
 
+// Es soll möglich sein, Dateien ”herunterzuladen“. Negativ Test
 func TestDownloadFileNotLoggedIn(t *testing.T) {
 	req, err := http.NewRequest("POST", "/download", nil)
 
@@ -337,6 +347,7 @@ func TestDownloadFileWGETValidFile(t *testing.T) {
 	}
 }
 
+// Es soll möglich sein, Dateien ”herunterzuladen“ über wget. Negativ Beispiel
 func TestDownloadFileWGETUnvalidFile(t *testing.T) {
 	req, err := http.NewRequest("GET", "/wget?path=./user_test1.csv", nil)
 
@@ -354,6 +365,7 @@ func TestDownloadFileWGETUnvalidFile(t *testing.T) {
 	}
 }
 
+// Es soll möglich sein, Dateien ”herunterzuladen“ über wget. Negativ Beispiel
 func TestDownloadFileWGETUnvalidAccount(t *testing.T) {
 	req, err := http.NewRequest("GET", "/wget?path=./user_test.csv", nil)
 
@@ -447,6 +459,7 @@ func TestCreateFolder(t *testing.T) {
 	}
 }
 
+//Erstelle Ordner ohne eingelogged zu sein
 func TestCreateFolderNotLoggedIn(t *testing.T) {
 	req, err := http.NewRequest("POST", "/newFolder", nil)
 
@@ -488,6 +501,7 @@ func TestDeleteFolder(t *testing.T) {
 	}
 }
 
+//Es möglich sein, Ordner zu löschen. Negativ Beispiel (Nicht eingelogged)
 func TestDeleteFolderNotLoggedIn(t *testing.T) {
 	req, err := http.NewRequest("POST", "/delete", nil)
 
@@ -504,6 +518,7 @@ func TestDeleteFolderNotLoggedIn(t *testing.T) {
 	}
 }
 
+//Es möglich sein, Ordner zu löschen. Negativ Beispiel (Lehrer Pfad)
 func TestDeleteFolderPathEmpty(t *testing.T) {
 	req, err := http.NewRequest("POST", "/delete", nil)
 
@@ -527,6 +542,7 @@ func TestDeleteFolderPathEmpty(t *testing.T) {
 	}
 }
 
+//Startseite Testen ob weiterleitung funktioniert
 func TestIndexHandlerLoggedIn(t *testing.T){
 	req, err := http.NewRequest("GET", "/", nil)
 
@@ -545,6 +561,7 @@ func TestIndexHandlerLoggedIn(t *testing.T){
 	}
 }
 
+//Prüft Ordnerstrunkturrückgabe
 func TestFolderStructHandlerLoggedIn(t *testing.T){
 	req, err := http.NewRequest("GET", "/getFolderStruct", nil)
 
@@ -562,7 +579,7 @@ func TestFolderStructHandlerLoggedIn(t *testing.T){
 		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 }
-
+//Prüft Ordnerstrunkturrückgabe. Negativ Test (Nicht eingelogged)
 func TestFolderStructHandlerNotLoggedIn(t *testing.T){
 	req, err := http.NewRequest("GET", "/getFolderStruct", nil)
 
@@ -578,6 +595,7 @@ func TestFolderStructHandlerNotLoggedIn(t *testing.T){
 	}
 }
 
+//Prüft das ausloggen
 func TestLogoutHandlerLoggedIn(t *testing.T){
 	req, err := http.NewRequest("GET", "/logout", nil)
 
@@ -596,6 +614,7 @@ func TestLogoutHandlerLoggedIn(t *testing.T){
 	}
 }
 
+//Prüft das Ausloggen. Negativ Test (Nicht eingelogged)
 func TestLogoutHandlerNotLoggedIn(t *testing.T){
 	req, err := http.NewRequest("GET", "/logout", nil)
 
@@ -637,7 +656,7 @@ func TestChangePasswordValid(t *testing.T) {
 		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusFound)
 	}
 }
-
+//Prüft weiterleitung der Hauptseite
 func TestLandriveHandlerLoggedIn(t *testing.T){
 	req, err := http.NewRequest("GET", "/landrive", nil)
 

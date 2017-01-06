@@ -289,7 +289,7 @@ func newUserHandler(w http.ResponseWriter, req *http.Request) {
 
 /*
 Fügt einen User der CSV Datei auf dem Server hinzu
- */
+*/
 func createUser(username string, password string) user {
 	salt := generateSalt()
 	hashedPw := hash([]string{password, salt})
@@ -376,7 +376,6 @@ func (a AuthenticatorFunc) Authenticate(user *user, password string) bool {
 	return false
 }
 
-
 func hash(strings []string) string {
 	hasher := sha256.New()
 	for _, value := range strings {
@@ -393,6 +392,7 @@ func createFolder(path string) {
 }
 
 /*
+Repräsentiert einen Ordner
 */
 type Folder struct {
 	Name    string
@@ -400,12 +400,18 @@ type Folder struct {
 	Folders []Folder
 }
 
+/*
+Repräsentiert eine Datei
+*/
 type File struct {
 	Name string
 	Date time.Time
 	Size int64
 }
 
+/*
+Gibt die Untere Ordnerstruktur eines Pfades zurück
+ */
 func getFolderStruct(path string) Folder {
 	//log.Println(path)
 	index := strings.Index(path, "/")
@@ -433,6 +439,9 @@ func getFolderStruct(path string) Folder {
 	return folder
 }
 
+/*
+Läd eine Datei die in FormFile und FormValue definiert ist hoch.
+*/
 func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
@@ -472,6 +481,9 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+/*
+Ändert ein Passwort. Überprüft das alte Passwort. Überprüft ob beide neuen Passwörter gleich sind. Wenn ja wird es in der CSV-Datei im Server niedergeschrieben.
+*/
 func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
 
 	log.Println("changePassword")
@@ -491,9 +503,11 @@ func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
 				user := loadUser(user.name)
 				loginUser(user, w, req)
 			} else {
+				log.Println("ChangePW: Old PW is not Right")
 				http.Redirect(w, req, "?change=oldPwFalse", http.StatusMovedPermanently)
 			}
 		} else {
+			log.Println("ChangePW: PW1 is not PW2")
 			http.Redirect(w, req, "?change=pwRepeatFalse", http.StatusMovedPermanently)
 		}
 	} else {
@@ -501,6 +515,9 @@ func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+/*
+Löscht einen User aus der CSV-Datei im Server und legt in daraufhin mit neuem Passwort wieder an
+*/
 func changePasswordInFile(user *user, newPassword string) {
 	input, err := ioutil.ReadFile(flag.Lookup("L").Value.String())
 	if err != nil {
@@ -531,6 +548,7 @@ func doRequestWithPassword(t *testing.T, url string) *http.Response {
 	assert.NoError(t, err)
 	return res
 }
+
 
 func createServer(auth AuthenticatorFuncBasic) *httptest.Server {
 	return httptest.NewServer(WrapperBasic(auth, func(w http.ResponseWriter, r *http.Request) {
