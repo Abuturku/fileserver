@@ -1,3 +1,4 @@
+//Authors: Andreas Schick (2792119), Linda Latreider (7743782), Niklas Nikisch (9364290)
 package server
 
 import (
@@ -277,7 +278,7 @@ func TestSaveFile(t *testing.T){
 	req.Header.Set("Content-type", `multipart/form-data; boundary="MyBoundary"`)
 
 	rr := httptest.NewRecorder()
-	,,c := req.FormFile("uploadFile")
+	_,_,c := req.FormFile("uploadFile")
 
 	t.Log(c)
 

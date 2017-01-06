@@ -2,7 +2,6 @@
 package server
 
 import (
-	//"bytes"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/csv"
@@ -31,10 +30,10 @@ type AuthenticatorStruct struct {
 }
 
 /*
-StartFileserver setzte alle Adressen für die Händler und Startet den Server für die zuvor angegebenen Parameter
+StartFileserver setzt alle Adressen für die Handler und startet den Server für die zuvor angegebenen Parameter
 */
 func StartFileserver() {
-	log.Println("Server Startet")
+	log.Println("Server startet")
 	http.HandleFunc("/", index)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/register", newUserHandler)
@@ -56,11 +55,10 @@ func StartFileserver() {
 }
 
 /*
-Wird aufgerufen wenn ein User die Webseite (Startseite) betritt. Sollte er einen gültigen cookie besitzen wird er sofort auf die Hauptseite weitergeleitet
+Wird aufgerufen wenn ein User die Webseite (Startseite) betritt. Sollte er einen gültigen Cookie besitzen wird er sofort auf die Hauptseite weitergeleitet
 */
 func index(w http.ResponseWriter, req *http.Request) {
 	cookiecheck, _, _ := checkCookie(w, req)
-	log.Println(cookiecheck)
 	if cookiecheck {
 		http.Redirect(w, req, "/landrive", http.StatusMovedPermanently)
 	} else {
@@ -70,7 +68,7 @@ func index(w http.ResponseWriter, req *http.Request) {
 }
 
 /*
-Wird beim Betreten der Hauptseite aufgerufen. Sollte jedoch kein gültiger Cookie vorhanden sein wird man auf die Startseite weitergeleitet.
+Wird beim Betreten der Hauptseite aufgerufen. Sollte jedoch kein gültiger Cookie vorhanden sein, wird man auf die Startseite weitergeleitet.
 */
 func landrive(w http.ResponseWriter, req *http.Request) {
 	cookiecheck, _, _ := checkCookie(w, req)
@@ -89,7 +87,7 @@ func landrive(w http.ResponseWriter, req *http.Request) {
 }
 
 /*
-Wird genutzt um das Ordnerverzeichnes eines Users zurück zu geben. Zuvor wird geprüft ob ein gültiger Cookie vorhanden ist.
+Wird genutzt um die Ordnerstruktur eines Users zurück zu geben. Zuvor wird geprüft ob ein gültiger Cookie vorhanden ist.
 */
 func folderStructHandler(w http.ResponseWriter, req *http.Request) {
 	cookiecheck, user, _ := checkCookie(w, req)
@@ -142,14 +140,14 @@ func createFolderHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 /*
-Löscht einen Ordner oder eine Datei der anhand des übergebenen Pfades identifiziert wird.
+Löscht einen Ordner oder eine Datei der/die anhand des übergebenen Pfades identifiziert wird.
 */
 func deleteHandler(w http.ResponseWriter, req *http.Request) {
 	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
 
 		path := req.FormValue("path")
-		log.Println("delete: " + path)
+		log.Println("Delete (" + user.name + "): " + path)
 		if path != "" {
 			os.RemoveAll(flag.Lookup("F").Value.String() + user.name + "/" + path)
 		} else {
@@ -163,14 +161,14 @@ func deleteHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 /*
-Startet den Download der Angeforderten Datei
+Startet den Download der angeforderten Datei
 */
 func downloadHandler(w http.ResponseWriter, req *http.Request) {
 	cookiecheck, user, _ := checkCookie(w, req)
 	if cookiecheck {
 		path := req.FormValue("path")
 		stringarray := strings.Split(path, "/")
-		log.Println("Download File: " + path)
+		log.Println("Download File (" + user.name + "): " + path)
 
 		w.Header().Set("Content-Disposition", "attachment; filename=\""+stringarray[len(stringarray)-1]+"\"")
 
@@ -182,7 +180,7 @@ func downloadHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 /*
-Startet den Download der Angeforderten Datei welchen über eine Konsole getätigt wurde
+Startet den Download der angeforderten Datei, welche über wget angefordert wurde
 */
 //wget muss mit den Parameter --no-check-certificate und --auth-no-challenge augerufen werden (am besten auch noch mit --content-disposition
 //z.B. wget --user=[username] --password=[password] --no-check-certificate --auth-no-challenge --content-disposition https://[host]:[port]/wget?path=[filepath]
@@ -191,8 +189,6 @@ func wgetHandler(w http.ResponseWriter, req *http.Request) {
 	username, password, _ := req.BasicAuth()
 
 	user := loadUser(username)
-
-	log.Println("testing wget")
 
 	if AuthenticatorVar.Authenticate(user, password) {
 		path := req.URL.Query().Get("path")
@@ -209,7 +205,7 @@ func wgetHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 /*
-Prüft einen Cookie, ob er valide ist.
+Prüft ob ein Cookie gültig ist
 */
 func checkCookie(w http.ResponseWriter, req *http.Request) (bool, user, http.Cookie) {
 	cookies := req.Cookies()
@@ -232,18 +228,16 @@ func checkCookie(w http.ResponseWriter, req *http.Request) (bool, user, http.Coo
 }
 
 /*
-Prüft Name und Passwort beim Login und leitet bei erfolgreicher Überprüfung den Login weiter
+Prüft Name und Passwort beim Login und leitet bei erfolgreicher Überprüfung den User weiter
 */
 func loginHandler(w http.ResponseWriter, req *http.Request) {
-	log.Println("User tried to log in")
+
 	username := req.FormValue("username")
 	password := req.FormValue("password")
-	log.Println("User:", username, "Password:", password)
+	log.Println("User " + username + " tried to log in")
 	user := loadUser(username)
-	log.Println("Found user: ", user)
-	authenticationSuccessful := AuthenticatorVar.Authenticate(user, password)
 
-	if authenticationSuccessful {
+	if AuthenticatorVar.Authenticate(user, password) {
 		loginUser(user, w, req)
 	} else {
 		http.Redirect(w, req, "?login=false", http.StatusMovedPermanently)
@@ -252,26 +246,27 @@ func loginHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 /*
-Loged den User ein, indem ein Cookie für diesen erstellt und gesetzt wird.
+Loggt den User ein, indem ein Cookie für diesen erstellt und gesetzt wird.
 */
 func loginUser(user *user, w http.ResponseWriter, req *http.Request) {
 	cookieValue := hash([]string{user.name, user.password})
 	maxAge, _ := strconv.Atoi(flag.Lookup("T").Value.String())
 	cookie := http.Cookie{Name: user.name, Value: cookieValue, MaxAge: maxAge, Expires: time.Now().Add(15 * time.Minute)}
-	log.Println("Setting cookie")
+	log.Println("Setting cookie for " + user.name)
 	http.SetCookie(w, &cookie)
-	log.Println("Redirecting to landrive")
+	log.Println("Redirecting " + user.name + " to landrive")
 	http.Redirect(w, req, "/landrive", http.StatusFound)
 }
 
 /*
-Regestriert einen User. Prüft ob beide Passwörter gleich sind und ob es den User noch nicht gibt
+Registriert einen User. Prüft ob beide Passwörter gleich sind und ob es den User noch nicht gibt
 */
 func newUserHandler(w http.ResponseWriter, req *http.Request) {
-	log.Println("User tried to register")
 	username := req.FormValue("username")
 	password := req.FormValue("password")
 	password2 := req.FormValue("password2")
+
+	log.Println("User " + username + " tried to register")
 
 	if password == password2 {
 		user := loadUser(username)
@@ -305,7 +300,7 @@ func createUser(username string, password string) user {
 	//writer.Write(username)
 	//writer.Write(hashedPw)
 	//writer.Write(salt)
-	log.Println("Writing to csv")
+	log.Println("Writing user " + username + " to csv")
 	writer.Write([]string{username, hashedPw, salt})
 	writer.Flush()
 	err = writer.Error()
@@ -318,7 +313,7 @@ func createUser(username string, password string) user {
 }
 
 /*
-Generiert einen zufälligen Wert. Den Salt
+Generiert einen zufälligen Wert (-> Salt)
 */
 func generateSalt() string {
 	saltSize := 16
@@ -326,7 +321,7 @@ func generateSalt() string {
 	_, err := rand.Read(buf)
 
 	if err != nil {
-		fmt.Printf("random read failed: %v", err)
+		log.Printf("Random read failed: %v", err)
 	}
 
 	return hex.EncodeToString(buf)
@@ -342,7 +337,7 @@ type user struct {
 }
 
 /*
-Läd den User aus der CSV Datei, die im Server Liegt
+Lädt den User aus der CSV Datei, die im Server liegt
 */
 func loadUser(username string) *user {
 	f, _ := os.Open(flag.Lookup("L").Value.String())
@@ -357,12 +352,12 @@ func loadUser(username string) *user {
 		if record[0] == username {
 			return &user{name: record[0], password: record[1], salt: record[2]}
 		}
-		log.Println(record[0], username)
-		log.Println(record[0] == username)
 	}
 	return &user{name: "", password: "", salt: ""}
 }
 
+//Implementierung einer AuthenticatorFunc
+//Hasht übergebenes password mit dem Salt des Users und prüft dann, ob der erzeugte Hash äquivalent zum gespeicherten Hash ist
 func (a AuthenticatorFunc) Authenticate(user *user, password string) bool {
 	//hasher := sha256.New()
 	//hasher.Write([]byte(password))
@@ -376,6 +371,7 @@ func (a AuthenticatorFunc) Authenticate(user *user, password string) bool {
 	return false
 }
 
+//Hasht alle Strings eines String-Arrays
 func hash(strings []string) string {
 	hasher := sha256.New()
 	for _, value := range strings {
@@ -410,10 +406,9 @@ type File struct {
 }
 
 /*
-Gibt die Untere Ordnerstruktur eines Pfades zurück
+Gibt die untere Ordnerstruktur eines Pfades zurück
  */
 func getFolderStruct(path string) Folder {
-	//log.Println(path)
 	index := strings.Index(path, "/")
 	var name string
 	if index > 0 {
@@ -423,14 +418,12 @@ func getFolderStruct(path string) Folder {
 	}
 	files := make([]File, 0)
 	folders := make([]Folder, 0)
-	//log.Println(name + ": ")
 	fileinfos, _ := ioutil.ReadDir(flag.Lookup("F").Value.String() + "/" + path)
 
 	for _, file := range fileinfos {
 		if file.IsDir() {
 			folders = append(folders, getFolderStruct(path+"/"+file.Name()))
 		} else {
-			//log.Println(file.Name())
 			fileStruct := File{Name: file.Name(), Date: file.ModTime(), Size: file.Size()}
 			files = append(files, fileStruct)
 		}
@@ -440,7 +433,7 @@ func getFolderStruct(path string) Folder {
 }
 
 /*
-Läd eine Datei die in FormFile und FormValue definiert ist hoch.
+Lädt eine Datei die in FormFile und FormValue definiert ist hoch.
 */
 func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 	cookiecheck, user, _ := checkCookie(w, req)
@@ -477,7 +470,6 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 		}
 
 		log.Println(w, "File uploaded successfully : ")
-		log.Println(w, header.Filename)
 	}
 }
 
@@ -485,9 +477,10 @@ func uploadFileHandler(w http.ResponseWriter, req *http.Request) {
 Ändert ein Passwort. Überprüft das alte Passwort. Überprüft ob beide neuen Passwörter gleich sind. Wenn ja wird es in der CSV-Datei im Server niedergeschrieben.
 */
 func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
-
-	log.Println("changePassword")
 	cookiecheck, user, cookie := checkCookie(w, req)
+
+	log.Println("Change password request from user " + user.name)
+
 	if cookiecheck {
 		oldPW := req.FormValue("oldPassword")
 		newPW := req.FormValue("newPassword")
@@ -503,7 +496,7 @@ func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
 				user := loadUser(user.name)
 				loginUser(user, w, req)
 			} else {
-				log.Println("ChangePW: Old PW is not Right")
+				log.Println("ChangePW: Old PW was not correct")
 				http.Redirect(w, req, "?change=oldPwFalse", http.StatusMovedPermanently)
 			}
 		} else {
@@ -516,7 +509,7 @@ func changePasswordHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 /*
-Löscht einen User aus der CSV-Datei im Server und legt in daraufhin mit neuem Passwort wieder an
+Löscht einen User aus der CSV-Datei im Server und legt ihn daraufhin mit neuem Passwort wieder an
 */
 func changePasswordInFile(user *user, newPassword string) {
 	input, err := ioutil.ReadFile(flag.Lookup("L").Value.String())
@@ -539,6 +532,7 @@ func changePasswordInFile(user *user, newPassword string) {
 	createUser(user.name, newPassword)
 }
 
+//Siehe Vorlesungsfolien zu BasicAuth
 func doRequestWithPassword(t *testing.T, url string) *http.Response {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
@@ -549,18 +543,20 @@ func doRequestWithPassword(t *testing.T, url string) *http.Response {
 	return res
 }
 
-
+//Siehe Vorlesungsfolien zu BasicAuth
 func createServer(auth AuthenticatorFuncBasic) *httptest.Server {
 	return httptest.NewServer(WrapperBasic(auth, func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Hello client")
 	}))
 }
 
+
 type Authenticator interface {
 	Authenticate(user *user, password string) bool
 }
 
 type AuthenticatorFunc func(user *user, password string) bool
+
 
 type AuthenticatorBasic interface {
 	AuthenticateBasic(user, password string) bool
@@ -572,6 +568,7 @@ func (af AuthenticatorFuncBasic) AuthenticateBasic(user, password string) bool {
 	return af(user, password)
 }
 
+//Siehe Vorlesungsfolien zu BasicAuth
 func WrapperBasic(authenticator AuthenticatorBasic, handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, pswd, ok := r.BasicAuth()
